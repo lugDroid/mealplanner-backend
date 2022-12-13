@@ -1,7 +1,10 @@
+const cors = require("cors");
 const express = require("express");
 const app = express();
 
 app.use(express.json());
+app.use(express.static("build"));
+app.use(cors());
 
 let meals = [
   {
@@ -704,6 +707,12 @@ app.post("/api/plans", (req, res) => {
 
   res.json(newPlan);
 });
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: "Unknown Endpoint" });
+};
+
+app.use(unknownEndpoint);
 
 const PORT = 3001;
 app.listen(PORT);
