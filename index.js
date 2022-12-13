@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
 let meals = [
   {
     name: "Tortilla de patatas",
@@ -625,6 +627,13 @@ app.get("/api/meals/:id", (req, res) => {
   }
 });
 
+app.delete("/api/meals/:id", (req, res) => {
+  const id = Number(req.params.id);
+  meals = meals.filter((m) => m.id !== id);
+
+  res.status(204).end();
+});
+
 app.get("/api/groups", (req, res) => {
   res.json(groups);
 });
@@ -640,6 +649,13 @@ app.get("/api/groups/:id", (req, res) => {
   }
 });
 
+app.delete("/api/groups/:id", (req, res) => {
+  const id = Number(req.params.id);
+  groups = groups.filter((g) => g.id !== id);
+
+  res.status(204).end();
+});
+
 app.get("/api/plans", (req, res) => {
   res.json(plans);
 });
@@ -653,6 +669,13 @@ app.get("/api/plans/:id", (req, res) => {
   } else {
     res.status(404).end();
   }
+});
+
+app.delete("/api/plans/:id", (req, res) => {
+  const id = Number(req.params.id);
+  plans = plans.filter((p) => p.id !== id);
+
+  res.status(204).end();
 });
 
 const PORT = 3001;
