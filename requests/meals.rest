@@ -1,0 +1,15 @@
+GET http://localhost:3001/api/meals
+
+###
+GET http://localhost:3001/api/meals/43
+
+###
+POST http://localhost:3001/api/meals
+content-type: application/json
+
+{
+  "name": "Test Meal",
+  "group": "Test Group",
+  "timeOfDay": "Any",
+  "numberOfDays": 1
+}

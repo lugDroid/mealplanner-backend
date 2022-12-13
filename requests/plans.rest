@@ -1,0 +1,17 @@
+GET http://localhost:3001/api/plans
+
+###
+GET http://localhost:3001/api/plans/1
+
+###
+POST http://localhost:3001/api/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan",
+  "lunch": [],
+  "dinner": []
+}
+
+###
+GET http://localhost:3001/api/plans/3
