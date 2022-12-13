@@ -634,6 +634,15 @@ app.delete("/api/meals/:id", (req, res) => {
   res.status(204).end();
 });
 
+app.post("/api/meals", (req, res) => {
+  const newMeal = req.body;
+  newMeal.id = Math.max(...meals.map((m) => m.id)) + 1;
+
+  meals = meals.concat(newMeal);
+
+  res.json(newMeal);
+});
+
 app.get("/api/groups", (req, res) => {
   res.json(groups);
 });
@@ -656,6 +665,15 @@ app.delete("/api/groups/:id", (req, res) => {
   res.status(204).end();
 });
 
+app.post("/api/groups", (req, res) => {
+  const newGroup = req.body;
+  newGroup.id = Math.max(...groups.map((m) => m.id)) + 1;
+
+  groups = groups.concat(newGroup);
+
+  res.json(newGroup);
+});
+
 app.get("/api/plans", (req, res) => {
   res.json(plans);
 });
@@ -676,6 +694,15 @@ app.delete("/api/plans/:id", (req, res) => {
   plans = plans.filter((p) => p.id !== id);
 
   res.status(204).end();
+});
+
+app.post("/api/plans", (req, res) => {
+  const newPlan = req.body;
+  newPlan.id = Math.max(...plans.map((m) => m.id)) + 1;
+
+  plans = plans.concat(newPlan);
+
+  res.json(newPlan);
 });
 
 const PORT = 3001;
