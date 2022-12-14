@@ -3,3 +3,4 @@ build
 Dockerfile
 .dockerignore
 fly.toml
+mongo*.js
