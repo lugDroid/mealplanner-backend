@@ -1,4 +1,5 @@
 require("dotenv").config();
+const mongoose = require("mongoose");
 const cors = require("cors");
 const express = require("express");
 const app = express();
@@ -7,6 +8,19 @@ const Group = require("./models/group");
 app.use(express.json());
 app.use(express.static("build"));
 app.use(cors());
+
+mongoose.set("strictQuery", false);
+const url = process.env.MONGODB_URI;
+
+console.log("Connecting to MongoDB");
+mongoose
+  .connect(url)
+  .then((result) => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log("Error connecting to MongoDB:", error.message);
+  });
 
 let meals = [
   {
@@ -340,34 +354,6 @@ let meals = [
     numberOfDays: 2,
     timeOfDay: "Lunch",
     group: "Legumbres/Verduras",
-  },
-];
-
-let groups = [
-  {
-    name: "Carne",
-    weeklyRations: "4",
-    id: 1,
-  },
-  {
-    name: "Legumbres/Verduras",
-    weeklyRations: 6,
-    id: 2,
-  },
-  {
-    name: "Tortillas/Revueltos",
-    weeklyRations: 6,
-    id: 3,
-  },
-  {
-    name: "Pescado",
-    weeklyRations: "2",
-    id: 4,
-  },
-  {
-    name: "Pasta",
-    weeklyRations: "4",
-    id: 5,
   },
 ];
 
