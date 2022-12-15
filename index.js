@@ -1,6 +1,8 @@
+require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const app = express();
+const Group = require("./models/group");
 
 app.use(express.json());
 app.use(express.static("build"));
@@ -647,7 +649,9 @@ app.post("/api/meals", (req, res) => {
 });
 
 app.get("/api/groups", (req, res) => {
-  res.json(groups);
+  Group.find({}).then((groups) => {
+    res.json(groups);
+  });
 });
 
 app.get("/api/groups/:id", (req, res) => {
@@ -714,7 +718,7 @@ const unknownEndpoint = (req, res) => {
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
