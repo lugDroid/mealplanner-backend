@@ -9,7 +9,7 @@ content-type: application/json
 
 {
   "name": "Test Meal",
-  "group": "Test Group",
+  "group": "Pescado",
   "timeOfDay": "Any",
   "numberOfDays": 1
 }

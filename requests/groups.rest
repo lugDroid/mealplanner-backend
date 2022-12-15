@@ -1,13 +1,13 @@
 GET http://localhost:8080/api/groups
 
 ###
-GET http://localhost:8080/api/groups/639977d10186a8aa15db34a4
+GET http://localhost:8080/api/groups/639977d10186a8aa15db34a5
 
 ###
 POST http://localhost:8080/api/groups
-Content-Type: application/json
+content-type: application/json
 
 {
   "name": "Test Group",
-  "weeklyRations": "4",
+  "weeklyRations": 4
 }

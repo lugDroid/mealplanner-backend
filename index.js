@@ -601,9 +601,9 @@ let plans = [
   },
 ];
 
-app.get("/", (req, res) => {
+/* app.get("/", (req, res) => {
   res.send("<h1>Meal Planner App</h1>");
-});
+}); */
 
 app.get("/api/meals", (req, res) => {
   Meal.find({})
@@ -627,12 +627,23 @@ app.delete("/api/meals/:id", (req, res) => {
 });
 
 app.post("/api/meals", (req, res) => {
-  const newMeal = req.body;
-  newMeal.id = Math.max(...meals.map((m) => m.id)) + 1;
+  const body = req.body;
+  console.log(body);
 
-  meals = meals.concat(newMeal);
+  Group.findOne({ name: body.group }).then((group) => {
+    body.group = group._id;
 
-  res.json(newMeal);
+    const newMeal = new Meal({
+      name: body.name,
+      group: body.group,
+      timeOfDay: body.timeOfDay,
+      numberOfDays: body.numberOfDays,
+    });
+
+    newMeal.save().then((savedMeal) => {
+      res.json(savedMeal);
+    });
+  });
 });
 
 app.get("/api/groups", (req, res) => {
@@ -655,12 +666,16 @@ app.delete("/api/groups/:id", (req, res) => {
 });
 
 app.post("/api/groups", (req, res) => {
-  const newGroup = req.body;
-  newGroup.id = Math.max(...groups.map((m) => m.id)) + 1;
+  const body = req.body;
 
-  groups = groups.concat(newGroup);
+  const group = new Group({
+    name: body.name,
+    weeklyRations: body.weeklyRations,
+  });
 
-  res.json(newGroup);
+  group.save().then((savedGroup) => {
+    res.json(savedGroup);
+  });
 });
 
 app.get("/api/plans", (req, res) => {
