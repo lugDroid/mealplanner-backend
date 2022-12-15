@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/groups
 
 ###
-GET http://localhost:8080/api/groups/6
+GET http://localhost:8080/api/groups/639977d10186a8aa15db34a4
 
 ###
 POST http://localhost:8080/api/groups

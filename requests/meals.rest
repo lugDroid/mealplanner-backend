@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/meals
 
 ###
-GET http://localhost:8080/api/meals/43
+GET http://localhost:8080/api/meals/6399d750f043604c20c19dee
 
 ###
 POST http://localhost:8080/api/meals

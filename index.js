@@ -4,6 +4,8 @@ const cors = require("cors");
 const express = require("express");
 const app = express();
 const Group = require("./models/group");
+const Meal = require("./models/meal");
+const Plan = require("./models/plan");
 
 app.use(express.json());
 app.use(express.static("build"));
@@ -604,18 +606,17 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/meals", (req, res) => {
-  res.json(meals);
+  Meal.find({})
+    .populate("group")
+    .then((meals) => {
+      res.json(meals);
+    });
 });
 
 app.get("/api/meals/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const meal = meals.find((m) => m.id === id);
-
-  if (meal) {
+  Meal.findById(req.params.id).then((meal) => {
     res.json(meal);
-  } else {
-    res.status(404).end();
-  }
+  });
 });
 
 app.delete("/api/meals/:id", (req, res) => {
@@ -641,14 +642,9 @@ app.get("/api/groups", (req, res) => {
 });
 
 app.get("/api/groups/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const group = groups.find((g) => g.id === id);
-
-  if (group) {
+  Group.findById(req.params.id).then((group) => {
     res.json(group);
-  } else {
-    res.status(404).end();
-  }
+  });
 });
 
 app.delete("/api/groups/:id", (req, res) => {
@@ -668,18 +664,18 @@ app.post("/api/groups", (req, res) => {
 });
 
 app.get("/api/plans", (req, res) => {
-  res.json(plans);
+  Plan.find({})
+    .populate("lunch")
+    .populate("dinner")
+    .then((plans) => {
+      res.json(plans);
+    });
 });
 
 app.get("/api/plans/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const plan = plans.find((p) => p.id === id);
-
-  if (plan) {
+  Plan.findById(req.params.id).then((plan) => {
     res.json(plan);
-  } else {
-    res.status(404).end();
-  }
+  });
 });
 
 app.delete("/api/plans/:id", (req, res) => {
