@@ -1,10 +1,10 @@
-GET http://localhost:3001/api/groups
+GET http://localhost:8080/api/groups
 
 ###
-GET http://localhost:3001/api/groups/6
+GET http://localhost:8080/api/groups/6
 
 ###
-POST http://localhost:3001/api/groups
+POST http://localhost:8080/api/groups
 Content-Type: application/json
 
 {
