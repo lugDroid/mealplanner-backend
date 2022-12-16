@@ -628,7 +628,6 @@ app.delete("/api/meals/:id", (req, res) => {
 
 app.post("/api/meals", (req, res) => {
   const body = req.body;
-  console.log(body);
 
   Group.findOne({ name: body.group }).then((group) => {
     body.group = group._id;
@@ -701,12 +700,32 @@ app.delete("/api/plans/:id", (req, res) => {
 });
 
 app.post("/api/plans", (req, res) => {
-  const newPlan = req.body;
-  newPlan.id = Math.max(...plans.map((m) => m.id)) + 1;
+  const body = req.body;
 
-  plans = plans.concat(newPlan);
+  lunchPromises = [];
+  for (const mealName of body.lunch) {
+    lunchPromises.push(Meal.findOne({ name: mealName }));
+  }
 
-  res.json(newPlan);
+  dinnerPromises = [];
+  for (const mealName of body.dinner) {
+    dinnerPromises.push(Meal.findOne({ name: mealName }));
+  }
+
+  Promise.all([
+    Promise.all(lunchPromises).then((meals) => meals.map((m) => m._id)),
+    Promise.all(dinnerPromises).then((meals) => meals.map((m) => m._id)),
+  ]).then(([lunchIds, dinnerIds]) => {
+    const newPlan = new Plan({
+      name: body.name,
+      lunch: lunchIds,
+      dinner: dinnerIds,
+    });
+
+    newPlan.save().then((savedPlan) => {
+      res.json(savedPlan);
+    });
+  });
 });
 
 const unknownEndpoint = (req, res) => {

@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/plans
 
 ###
-GET http://localhost:8080/api/plans/1
+GET http://localhost:8080/api/plans/639c298590af092e5e1271b4
 
 ###
 POST http://localhost:8080/api/plans
@@ -9,8 +9,24 @@ Content-Type: application/json
 
 {
   "name": "Test Plan",
-  "lunch": [],
-  "dinner": []
+  "lunch": [
+    "Tortilla de patatas", 
+    "Pruebe con huevos fritos",
+    "Fajitas tortillas", 
+    "Tortilla de calabacin",
+    "Tortilla de patatas", 
+    "Pruebe con huevos fritos",
+    "Fajitas tortillas" 
+  ],
+  "dinner": [
+    "Tortilla de patatas", 
+    "Pruebe con huevos fritos",
+    "Fajitas tortillas", 
+    "Tortilla de calabacin",
+    "Tortilla de patatas", 
+    "Pruebe con huevos fritos",
+    "Fajitas tortillas"
+    ]
 }
 
 ###
