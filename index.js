@@ -614,9 +614,11 @@ app.get("/api/meals", (req, res) => {
 });
 
 app.get("/api/meals/:id", (req, res) => {
-  Meal.findById(req.params.id).then((meal) => {
-    res.json(meal);
-  });
+  Meal.findById(req.params.id)
+    .populate("group")
+    .then((meal) => {
+      res.json(meal);
+    });
 });
 
 app.delete("/api/meals/:id", (req, res) => {
@@ -679,17 +681,26 @@ app.post("/api/groups", (req, res) => {
 
 app.get("/api/plans", (req, res) => {
   Plan.find({})
-    .populate("lunch")
-    .populate("dinner")
+    .populate({
+      path: "lunch",
+      populate: { path: "group" },
+    })
+    .populate({
+      path: "dinner",
+      populate: { path: "group" },
+    })
     .then((plans) => {
       res.json(plans);
     });
 });
 
 app.get("/api/plans/:id", (req, res) => {
-  Plan.findById(req.params.id).then((plan) => {
-    res.json(plan);
-  });
+  Plan.findById(req.params.id)
+    .populate("lunch")
+    .populate("dinner")
+    .then((plan) => {
+      res.json(plan);
+    });
 });
 
 app.delete("/api/plans/:id", (req, res) => {
