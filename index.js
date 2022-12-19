@@ -65,6 +65,27 @@ app.post("/api/meals", (req, res) => {
   });
 });
 
+app.put("/api/meals/:id", (req, res) => {
+  const body = req.body;
+
+  Group.findOne({ name: body.group }).then((group) => {
+    body.group = group.id;
+
+    const modifiedMeal = {
+      name: body.name,
+      group: body.group,
+      timeOfDay: body.timeOfDay,
+      numberOfDays: body.numberOfDays,
+    };
+
+    Meal.findByIdAndUpdate(req.params.id, modifiedMeal, { new: true }).then(
+      (updatedMeal) => {
+        res.json(updatedMeal);
+      }
+    );
+  });
+});
+
 app.get("/api/groups", (req, res) => {
   Group.find({}).then((groups) => {
     res.json(groups);
@@ -94,6 +115,21 @@ app.post("/api/groups", (req, res) => {
   group.save().then((savedGroup) => {
     res.json(savedGroup);
   });
+});
+
+app.put("/api/groups/:id", (req, res) => {
+  const body = req.body;
+
+  const modifiedGroup = {
+    name: body.name,
+    weeklyRations: body.weeklyRations,
+  };
+
+  Group.findByIdAndUpdate(req.params.id, modifiedGroup, { new: true }).then(
+    (updatedGroup) => {
+      res.json(updatedGroup);
+    }
+  );
 });
 
 app.get("/api/plans", (req, res) => {
@@ -152,6 +188,37 @@ app.post("/api/plans", (req, res) => {
     newPlan.save().then((savedPlan) => {
       res.json(savedPlan);
     });
+  });
+});
+
+app.put("/api/plans/:id", (req, res) => {
+  const body = req.body;
+
+  lunchPromises = [];
+  for (const mealName of body.lunch) {
+    lunchPromises.push(Meal.findOne({ name: mealName }));
+  }
+
+  dinnerPromises = [];
+  for (const mealName of body.dinner) {
+    dinnerPromises.push(Meal.findOne({ name: mealName }));
+  }
+
+  Promise.all([
+    Promise.all(lunchPromises).then((meals) => meals.map((m) => m._id)),
+    Promise.all(dinnerPromises).then((meals) => meals.map((m) => m._id)),
+  ]).then(([lunchIds, dinnerIds]) => {
+    const modifiedPlan = {
+      name: body.name,
+      lunch: lunchIds,
+      dinner: dinnerIds,
+    };
+
+    Plan.findByIdAndUpdate(req.params.id, modifiedPlan, { new: true }).then(
+      (updatedPlan) => {
+        res.json(updatedPlan);
+      }
+    );
   });
 });
 

@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/groups
 
 ###
-GET http://localhost:8080/api/groups/63a070030aa4dda29478c2da
+GET http://localhost:8080/api/groups/63a072e7f987df5ed7dd2e19
 
 ###
 POST http://localhost:8080/api/groups
@@ -13,4 +13,13 @@ content-type: application/json
 }
 
 ###
-DELETE http://localhost:8080/api/groups/63a070030aa4dda29478c2da
+PUT http://localhost:8080/api/groups/63a072e7f987df5ed7dd2e19
+content-type: application/json
+
+{
+  "name": "Modified Test Group",
+  "weeklyRations": 4
+}
+
+###
+DELETE http://localhost:8080/api/groups/63a072e7f987df5ed7dd2e19

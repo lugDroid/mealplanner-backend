@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/meals
 
 ###
-GET http://localhost:8080/api/meals/63a06f7c2c5d421dfc46d85b
+GET http://localhost:8080/api/meals/63a07320f987df5ed7dd2e24
 
 ###
 POST http://localhost:8080/api/meals
@@ -9,6 +9,17 @@ content-type: application/json
 
 {
   "name": "Test Meal",
+  "group": "Pescado",
+  "timeOfDay": "Any",
+  "numberOfDays": 1
+}
+
+###
+PUT http://localhost:8080/api/meals/63a07320f987df5ed7dd2e24
+content-type: application/json
+
+{
+  "name": "Modified Test Meal",
   "group": "Pescado",
   "timeOfDay": "Any",
   "numberOfDays": 1
