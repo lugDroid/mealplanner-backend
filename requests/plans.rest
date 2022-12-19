@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/plans
 
 ###
-GET http://localhost:8080/api/plans/639c298590af092e5e1271b4
+GET http://localhost:8080/api/plans/63a070290aa4dda29478c2ed
 
 ###
 POST http://localhost:8080/api/plans
@@ -30,4 +30,4 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/plans/3
+DELETE http://localhost:8080/api/plans/63a070290aa4dda29478c2ed
