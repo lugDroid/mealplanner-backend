@@ -76,9 +76,12 @@ app.post("/api/meals", (req, res) => {
       numberOfDays: body.numberOfDays,
     });
 
-    newMeal.save().then((savedMeal) => {
-      res.json(savedMeal);
-    });
+    newMeal
+      .save()
+      .then((savedMeal) => {
+        res.json(savedMeal);
+      })
+      .catch((error) => next(error));
   });
 });
 
@@ -137,9 +140,12 @@ app.post("/api/groups", (req, res) => {
     weeklyRations: body.weeklyRations,
   });
 
-  group.save().then((savedGroup) => {
-    res.json(savedGroup);
-  });
+  group
+    .save()
+    .then((savedGroup) => {
+      res.json(savedGroup);
+    })
+    .catch((error) => next(error));
 });
 
 app.put("/api/groups/:id", (req, res) => {
@@ -217,9 +223,12 @@ app.post("/api/plans", (req, res) => {
       dinner: dinnerIds,
     });
 
-    newPlan.save().then((savedPlan) => {
-      res.json(savedPlan);
-    });
+    newPlan
+      .save()
+      .then((savedPlan) => {
+        res.json(savedPlan);
+      })
+      .catch((error) => next(error));
   });
 });
 
