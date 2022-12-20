@@ -7,8 +7,8 @@ const Group = require("./models/group");
 const Meal = require("./models/meal");
 const Plan = require("./models/plan");
 
-app.use(express.json());
 app.use(express.static("build"));
+app.use(express.json());
 app.use(cors());
 
 mongoose.set("strictQuery", false);
@@ -32,6 +32,16 @@ app.get("/api/meals", (req, res) => {
     });
 });
 
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
+
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "Malformatted Id" });
+  }
+
+  next(error);
+};
+
 app.get("/api/meals/:id", (req, res) => {
   Meal.findById(req.params.id)
     .populate("group")
@@ -41,13 +51,16 @@ app.get("/api/meals/:id", (req, res) => {
       } else {
         res.status(404).end();
       }
-    });
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/meals/:id", (req, res) => {
-  Meal.findByIdAndRemove(req.params.id).then((result) => {
-    res.status(204).end();
-  });
+  Meal.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/meals", (req, res) => {
@@ -82,11 +95,11 @@ app.put("/api/meals/:id", (req, res) => {
       numberOfDays: body.numberOfDays,
     };
 
-    Meal.findByIdAndUpdate(req.params.id, modifiedMeal, { new: true }).then(
-      (updatedMeal) => {
+    Meal.findByIdAndUpdate(req.params.id, modifiedMeal, { new: true })
+      .then((updatedMeal) => {
         res.json(updatedMeal);
-      }
-    );
+      })
+      .catch((error) => next(error));
   });
 });
 
@@ -97,19 +110,23 @@ app.get("/api/groups", (req, res) => {
 });
 
 app.get("/api/groups/:id", (req, res) => {
-  Group.findById(req.params.id).then((group) => {
-    if (group) {
-      res.json(group);
-    } else {
-      res.status(404).end();
-    }
-  });
+  Group.findById(req.params.id)
+    .then((group) => {
+      if (group) {
+        res.json(group);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/groups/:id", (req, res) => {
-  Group.findByIdAndRemove(req.params.id).then((result) => {
-    res.status(204).end();
-  });
+  Group.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/groups", (req, res) => {
@@ -133,11 +150,11 @@ app.put("/api/groups/:id", (req, res) => {
     weeklyRations: body.weeklyRations,
   };
 
-  Group.findByIdAndUpdate(req.params.id, modifiedGroup, { new: true }).then(
-    (updatedGroup) => {
+  Group.findByIdAndUpdate(req.params.id, modifiedGroup, { new: true })
+    .then((updatedGroup) => {
       res.json(updatedGroup);
-    }
-  );
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/plans", (req, res) => {
@@ -165,13 +182,16 @@ app.get("/api/plans/:id", (req, res) => {
       } else {
         res.status(404).end();
       }
-    });
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/plans/:id", (req, res) => {
-  Plan.findByIdAndRemove(req.params.id).then((result) => {
-    res.status(204).end();
-  });
+  Plan.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/plans", (req, res) => {
@@ -226,11 +246,11 @@ app.put("/api/plans/:id", (req, res) => {
       dinner: dinnerIds,
     };
 
-    Plan.findByIdAndUpdate(req.params.id, modifiedPlan, { new: true }).then(
-      (updatedPlan) => {
+    Plan.findByIdAndUpdate(req.params.id, modifiedPlan, { new: true })
+      .then((updatedPlan) => {
         res.json(updatedPlan);
-      }
-    );
+      })
+      .catch((error) => next(error));
   });
 });
 
@@ -239,6 +259,7 @@ const unknownEndpoint = (req, res) => {
 };
 
 app.use(unknownEndpoint);
+app.use(errorHandler); // This has to be the last loaded middleware
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
