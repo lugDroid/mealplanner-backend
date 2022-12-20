@@ -36,7 +36,11 @@ app.get("/api/meals/:id", (req, res) => {
   Meal.findById(req.params.id)
     .populate("group")
     .then((meal) => {
-      res.json(meal);
+      if (meal) {
+        res.json(meal);
+      } else {
+        res.status(404).end();
+      }
     });
 });
 
@@ -94,7 +98,11 @@ app.get("/api/groups", (req, res) => {
 
 app.get("/api/groups/:id", (req, res) => {
   Group.findById(req.params.id).then((group) => {
-    res.json(group);
+    if (group) {
+      res.json(group);
+    } else {
+      res.status(404).end();
+    }
   });
 });
 
@@ -152,7 +160,11 @@ app.get("/api/plans/:id", (req, res) => {
     .populate("lunch")
     .populate("dinner")
     .then((plan) => {
-      res.json(plan);
+      if (plan) {
+        res.json(plan);
+      } else {
+        res.status(404).end();
+      }
     });
 });
 
