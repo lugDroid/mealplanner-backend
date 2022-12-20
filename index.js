@@ -24,14 +24,6 @@ mongoose
     console.log("Error connecting to MongoDB:", error.message);
   });
 
-app.get("/api/meals", (req, res) => {
-  Meal.find({})
-    .populate("group")
-    .then((meals) => {
-      res.json(meals);
-    });
-});
-
 const errorHandler = (error, req, res, next) => {
   console.log(error.message);
 
@@ -41,6 +33,14 @@ const errorHandler = (error, req, res, next) => {
 
   next(error);
 };
+
+app.get("/api/meals", (req, res) => {
+  Meal.find({})
+    .populate("group")
+    .then((meals) => {
+      res.json(meals);
+    });
+});
 
 app.get("/api/meals/:id", (req, res) => {
   Meal.findById(req.params.id)
