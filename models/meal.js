@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const mealSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, minLength: 3, required: true },
   group: { type: mongoose.Schema.ObjectId, ref: "Group" },
   timeOfDay: String,
-  numberOfDays: Number,
+  numberOfDays: { type: Number, required: true },
 });
 
 mealSchema.set("toJSON", {

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const planSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, minLength: 3, required: true },
   lunch: [{ type: mongoose.Schema.ObjectId, ref: "Meal" }],
   dinner: [{ type: mongoose.Schema.ObjectId, ref: "Meal" }],
 });

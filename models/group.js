@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const groupSchema = new mongoose.Schema({
-  name: String,
-  weeklyRations: Number,
+  name: { type: String, minLength: 3, required: true },
+  weeklyRations: { type: Number, required: true },
 });
 
 groupSchema.set("toJSON", {
