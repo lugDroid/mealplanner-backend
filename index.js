@@ -100,7 +100,11 @@ app.put("/api/meals/:id", (req, res) => {
       numberOfDays: body.numberOfDays,
     };
 
-    Meal.findByIdAndUpdate(req.params.id, modifiedMeal, { new: true })
+    Meal.findByIdAndUpdate(req.params.id, modifiedMeal, {
+      new: true,
+      runValidators: true,
+      context: "query",
+    })
       .then((updatedMeal) => {
         res.json(updatedMeal);
       })
@@ -158,7 +162,11 @@ app.put("/api/groups/:id", (req, res) => {
     weeklyRations: body.weeklyRations,
   };
 
-  Group.findByIdAndUpdate(req.params.id, modifiedGroup, { new: true })
+  Group.findByIdAndUpdate(req.params.id, modifiedGroup, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
     .then((updatedGroup) => {
       res.json(updatedGroup);
     })
@@ -257,7 +265,11 @@ app.put("/api/plans/:id", (req, res) => {
       dinner: dinnerIds,
     };
 
-    Plan.findByIdAndUpdate(req.params.id, modifiedPlan, { new: true })
+    Plan.findByIdAndUpdate(req.params.id, modifiedPlan, {
+      new: true,
+      runValidators: true,
+      context: "query",
+    })
       .then((updatedPlan) => {
         res.json(updatedPlan);
       })
