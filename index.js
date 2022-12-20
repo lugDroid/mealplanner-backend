@@ -70,7 +70,6 @@ app.post("/api/meals", (req, res) => {
 
   Group.findOne({ name: body.group }).then((group) => {
     body.group = group._id;
-
     const newMeal = new Meal({
       name: body.name,
       group: body.group,
@@ -81,6 +80,7 @@ app.post("/api/meals", (req, res) => {
     newMeal
       .save()
       .then((savedMeal) => {
+        savedMeal.group = group;
         res.json(savedMeal);
       })
       .catch((error) => next(error));
@@ -105,6 +105,7 @@ app.put("/api/meals/:id", (req, res) => {
       runValidators: true,
       context: "query",
     })
+      .populate("group")
       .then((updatedMeal) => {
         res.json(updatedMeal);
       })
@@ -212,15 +213,14 @@ app.delete("/api/plans/:id", (req, res) => {
 
 app.post("/api/plans", (req, res) => {
   const body = req.body;
-
   lunchPromises = [];
-  for (const mealName of body.lunch) {
-    lunchPromises.push(Meal.findOne({ name: mealName }));
+  for (const meal of body.lunch) {
+    lunchPromises.push(Meal.findOne({ name: meal.name }));
   }
 
   dinnerPromises = [];
-  for (const mealName of body.dinner) {
-    dinnerPromises.push(Meal.findOne({ name: mealName }));
+  for (const meal of body.dinner) {
+    dinnerPromises.push(Meal.findOne({ name: meal.name }));
   }
 
   Promise.all([
@@ -235,7 +235,17 @@ app.post("/api/plans", (req, res) => {
 
     newPlan
       .save()
-      .then((savedPlan) => {
+      .then(async (savedPlan) => {
+        await savedPlan.populate({
+          path: "lunch",
+          populate: { path: "group" },
+        });
+
+        await savedPlan.populate({
+          path: "dinner",
+          populate: { path: "group" },
+        });
+
         res.json(savedPlan);
       })
       .catch((error) => next(error));
@@ -246,13 +256,13 @@ app.put("/api/plans/:id", (req, res) => {
   const body = req.body;
 
   lunchPromises = [];
-  for (const mealName of body.lunch) {
-    lunchPromises.push(Meal.findOne({ name: mealName }));
+  for (const meal of body.lunch) {
+    lunchPromises.push(Meal.findOne({ name: meal.name }));
   }
 
   dinnerPromises = [];
-  for (const mealName of body.dinner) {
-    dinnerPromises.push(Meal.findOne({ name: mealName }));
+  for (const meal of body.dinner) {
+    dinnerPromises.push(Meal.findOne({ name: meal.name }));
   }
 
   Promise.all([
@@ -270,6 +280,14 @@ app.put("/api/plans/:id", (req, res) => {
       runValidators: true,
       context: "query",
     })
+      .populate({
+        path: "lunch",
+        populate: { path: "group" },
+      })
+      .populate({
+        path: "dinner",
+        populate: { path: "group" },
+      })
       .then((updatedPlan) => {
         res.json(updatedPlan);
       })
