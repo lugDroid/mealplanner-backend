@@ -1,4 +1,3 @@
-const { application } = require("express");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const helper = require("./group_test_helpers");
@@ -67,7 +66,7 @@ test("a group without name is not added", async () => {
   const groupsAtEnd = await helper.groupsInDb();
 
   expect(groupsAtEnd).toHaveLength(helper.initialGroups.length);
-})
+});
 
 afterAll(() => {
   mongoose.connection.close();

@@ -1,4 +1,3 @@
-const group = require("../models/group");
 const Group = require("../models/group");
 
 const initialGroups = [
