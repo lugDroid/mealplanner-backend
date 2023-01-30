@@ -6,7 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=development nodemon index.js",
-    "test": "NODE_ENV=test jest --verbose --runInBand --forceExit",
+    "test": "NODE_ENV=test jest --verbose --runInBand --forceExit --detectOpenHandles",
     "build:ui": "rm -rf build && cd ../mealplanner-app/ && npm run build && cp -r build ../mealplanner-backend",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",

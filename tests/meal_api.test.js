@@ -16,6 +16,7 @@ const initialGroups = [
     weeklyRations: 4,
   },
 ];
+
 const initialMeals = [
   {
     name: "Pasta con carne y bechamel",
