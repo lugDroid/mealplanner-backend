@@ -1,13 +1,13 @@
 const groupsRouter = require("express").Router();
 const Group = require("../models/group");
 
-groupsRouter.get("/", (req, res) => {
+groupsRouter.get("/", (req, res, next) => {
   Group.find({}).then((groups) => {
     res.json(groups);
   });
 });
 
-groupsRouter.get("/:id", (req, res) => {
+groupsRouter.get("/:id", (req, res, next) => {
   Group.findById(req.params.id)
     .then((group) => {
       if (group) {
@@ -19,7 +19,7 @@ groupsRouter.get("/:id", (req, res) => {
     .catch((error) => next(error));
 });
 
-groupsRouter.delete("/:id", (req, res) => {
+groupsRouter.delete("/:id", (req, res, next) => {
   Group.findByIdAndRemove(req.params.id)
     .then((result) => {
       res.status(204).end();
@@ -27,7 +27,7 @@ groupsRouter.delete("/:id", (req, res) => {
     .catch((error) => next(error));
 });
 
-groupsRouter.post("/", (req, res) => {
+groupsRouter.post("/", (req, res, next) => {
   const body = req.body;
 
   const group = new Group({
@@ -38,12 +38,12 @@ groupsRouter.post("/", (req, res) => {
   group
     .save()
     .then((savedGroup) => {
-      res.json(savedGroup);
+      res.status(201).json(savedGroup);
     })
     .catch((error) => next(error));
 });
 
-groupsRouter.put("/:id", (req, res) => {
+groupsRouter.put("/:id", (req, res, next) => {
   const body = req.body;
 
   const modifiedGroup = {
