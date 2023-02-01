@@ -1,37 +1,36 @@
 const groupsRouter = require("express").Router();
 const Group = require("../models/group");
 
-groupsRouter.get("/", (req, res) => {
-  Group.find({}).then((groups) => {
-    res.json(groups);
-  });
+groupsRouter.get("/", (req, res, next) => {
+  Group.find({})
+    .then(groups => {
+      res.json(groups);
+    })
+    .catch((error) => next(error));
+  /*   try {
+      const groups = Group.find({});
+      res.json(groups);
+    } catch (exception) {
+      next(exception);
+    } */
 });
 
-groupsRouter.get("/:id", async (req, res, next) => {
-  try {
-    const group = await Group.findById(req.params.id);
+groupsRouter.get("/:id", async (req, res) => {
+  const group = await Group.findById(req.params.id);
 
-    if (group) {
-      res.json(group);
-    } else {
-      res.status(404).end();
-    }
-  } catch (exception) {
-    next(exception);
-  }
-
-});
-
-groupsRouter.delete("/:id", async (req, res, next) => {
-  try {
-    await Group.findByIdAndRemove(req.params.id);
-    res.status(204).end();
-  } catch (exception) {
-    next(exception);
+  if (group) {
+    res.json(group);
+  } else {
+    res.status(404).end();
   }
 });
 
-groupsRouter.post("/", async (req, res, next) => {
+groupsRouter.delete("/:id", async (req, res) => {
+  await Group.findByIdAndRemove(req.params.id);
+  res.status(204).end();
+});
+
+groupsRouter.post("/", async (req, res) => {
   const body = req.body;
 
   const group = new Group({
@@ -39,16 +38,11 @@ groupsRouter.post("/", async (req, res, next) => {
     weeklyRations: body.weeklyRations,
   });
 
-  try {
-    const savedGroup = await group.save();
-    res.status(201).json(savedGroup);
-  } catch (exception) {
-    next(exception);
-  }
-
+  const savedGroup = await group.save();
+  res.status(201).json(savedGroup);
 });
 
-groupsRouter.put("/:id", (req, res, next) => {
+groupsRouter.put("/:id", async (req, res) => {
   const body = req.body;
 
   const modifiedGroup = {
@@ -56,15 +50,13 @@ groupsRouter.put("/:id", (req, res, next) => {
     weeklyRations: body.weeklyRations,
   };
 
-  Group.findByIdAndUpdate(req.params.id, modifiedGroup, {
+  const updatedGroup = await Group.findByIdAndUpdate(req.params.id, modifiedGroup, {
     new: true,
     runValidators: true,
     context: "query",
-  })
-    .then((updatedGroup) => {
-      res.json(updatedGroup);
-    })
-    .catch((error) => next(error));
+  });
+
+  res.json(updatedGroup);
 });
 
 module.exports = groupsRouter;

@@ -9,9 +9,10 @@ const api = supertest(app);
 beforeEach(async () => {
   await Group.deleteMany({});
 
-  for (const group of helper.initialGroups) {
-    await new Group(group).save();
-  }
+  const groupObjects = helper.initialGroups.map(g => new Group(g));
+
+  const promiseArray = groupObjects.map(g => g.save());
+  await Promise.all(promiseArray);
 });
 
 test("groups are returned as json", async () => {
@@ -80,7 +81,7 @@ test("a specific group can be viewed", async () => {
   expect(resultGroup.body).toEqual(groupToView);
 });
 
-test("A group can be deleted", async () => {
+test("a group can be deleted", async () => {
   const groupsAtStart = await helper.groupsInDb();
   const groupToDelete = groupsAtStart[0];
 
@@ -94,6 +95,23 @@ test("A group can be deleted", async () => {
 
   const names = groupsAtEnd.map(g => g.name);
   expect(names).not.toContain(groupToDelete.name);
+});
+
+test("a group name can be modified", async () => {
+  const groupsAtStart = await helper.groupsInDb();
+  const groupToModify = groupsAtStart[0];
+
+  groupToModify.name = "Modified name";
+
+  await api
+    .put(`/api/groups/${groupToModify.id}`)
+    .send(groupToModify)
+    .expect(200);
+
+  const groupsAtEnd = await helper.groupsInDb();
+  const names = groupsAtEnd.map(g => g.name);
+
+  expect(names).toContain(groupToModify.name);
 });
 
 afterAll(() => {
