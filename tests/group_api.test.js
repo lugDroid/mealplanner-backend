@@ -68,6 +68,34 @@ test("a group without name is not added", async () => {
   expect(groupsAtEnd).toHaveLength(helper.initialGroups.length);
 });
 
+test("a specific group can be viewed", async () => {
+  const groupsAtStart = await helper.groupsInDb();
+  const groupToView = groupsAtStart[0];
+
+  const resultGroup = await api
+    .get(`/api/groups/${groupToView.id}`)
+    .expect(200)
+    .expect("Content-Type", /application\/json/);
+
+  expect(resultGroup.body).toEqual(groupToView);
+});
+
+test("A group can be deleted", async () => {
+  const groupsAtStart = await helper.groupsInDb();
+  const groupToDelete = groupsAtStart[0];
+
+  await api
+    .delete(`/api/groups/${groupToDelete.id}`)
+    .expect(204);
+
+  const groupsAtEnd = await helper.groupsInDb();
+
+  expect(groupsAtEnd).toHaveLength(helper.initialGroups.length - 1);
+
+  const names = groupsAtEnd.map(g => g.name);
+  expect(names).not.toContain(groupToDelete.name);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
