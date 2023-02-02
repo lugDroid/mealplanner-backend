@@ -32,23 +32,25 @@ const initialMeals = [
   },
 ];
 
-beforeAll(async () => {
+beforeEach(async () => {
   await Group.deleteMany({});
   await Meal.deleteMany({});
 
-  for (const group of initialGroups) {
-    await new Group(group).save();
-    //console.log(group.name, "saved");
-  }
+  const groupObjects = initialGroups.map(g => new Group(g));
+  const groupPromiseArray = groupObjects.map(g => g.save());
+  await Promise.all(groupPromiseArray);
 
-  /*   const groups = await Group.find({});
-  console.log(groups.length); */
-
+  const savedGroups = await Group.find({});
+  const mealsWithGroupId = [];
   for (const meal of initialMeals) {
-    const group = await Group.findOne({ name: meal.group });
-    meal.group = group._id;
-    await new Meal(meal).save();
+    const group = savedGroups.find(g => g.name == meal.group);
+    const mealWithGroupId = { ...meal, group: group._id.toString() };
+    mealsWithGroupId.push(mealWithGroupId);
   }
+
+  const mealObjects = mealsWithGroupId.map(m => new Meal(m));
+  const mealPromiseArray = mealObjects.map(m => m.save());
+  await Promise.all(mealPromiseArray);
 });
 
 test("meals are returned as json", async () => {
