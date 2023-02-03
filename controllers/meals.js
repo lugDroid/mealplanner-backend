@@ -28,26 +28,41 @@ mealsRouter.delete("/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-mealsRouter.post("/", (req, res, next) => {
+mealsRouter.post("/", async (req, res) => {
   const body = req.body;
 
-  Group.findOne({ name: body.group }).then((group) => {
-    body.group = group._id;
-    const newMeal = new Meal({
-      name: body.name,
-      group: body.group,
-      timeOfDay: body.timeOfDay,
-      numberOfDays: body.numberOfDays,
-    });
+  if (!body.name) {
+    res.status(400).end();
+    throw Error("name required");
+  }
 
-    newMeal
-      .save()
-      .then((savedMeal) => {
-        savedMeal.group = group;
-        res.status(201).json(savedMeal);
-      })
-      .catch((error) => next(error));
+  if (!body.group) {
+    res.status(400).end();
+    throw Error("group required");
+  }
+
+  if (!body.timeOfDay) {
+    res.status(400).end();
+    throw Error("time of day required");
+  }
+
+  if (!body.numberOfDays) {
+    res.status(400).end();
+    throw Error("number of days required");
+  }
+
+  const group = await Group.findOne({ name: body.group });
+  body.group = group._id;
+  const newMeal = new Meal({
+    name: body.name,
+    group: body.group,
+    timeOfDay: body.timeOfDay,
+    numberOfDays: body.numberOfDays,
   });
+
+  const savedMeal = newMeal.save();
+  savedMeal.group = group;
+  res.status(201).json(savedMeal);
 });
 
 mealsRouter.put("/:id", (req, res, next) => {
