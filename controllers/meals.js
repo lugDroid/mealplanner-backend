@@ -44,7 +44,7 @@ mealsRouter.post("/", (req, res, next) => {
       .save()
       .then((savedMeal) => {
         savedMeal.group = group;
-        res.json(savedMeal);
+        res.status(201).json(savedMeal);
       })
       .catch((error) => next(error));
   });

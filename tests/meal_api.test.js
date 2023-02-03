@@ -42,6 +42,91 @@ test("a specific meal is within the returned meals", async () => {
   expect(names).toContain("Pasta con carne y bechamel");
 });
 
+test("a valid meal can be added", async () => {
+  const newMeal = {
+    name: "New meal",
+    group: helper.initialGroups[0].name,
+    timeOfDay: "Lunch",
+    numberOfDays: "1",
+  };
+
+  await api
+    .post("/api/meals")
+    .send(newMeal)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const mealsAtEnd = await helper.mealsInDb();
+  const names = mealsAtEnd.map(m => m.name);
+
+  expect(mealsAtEnd).toHaveLength(helper.initialMeals.length + 1);
+  expect(names).toContain("New meal");
+});
+
+test("a meal without name is not added", async () => {
+  const newMeal = {
+    group: helper.initialGroups[0].name,
+    timeOfDay: "Lunch",
+    numberOfDays: "1",
+  };
+
+  await api
+    .post("/api/meals")
+    .send(newMeal)
+    .expect(400);
+
+  const mealsAtEnd = await helper.mealsInDb();
+  expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
+});
+
+test("a meal without group is not added", async () => {
+  const newMeal = {
+    name: "New meal",
+    timeOfDay: "Lunch",
+    numberOfDays: "1",
+  };
+
+  await api
+    .post("/api/meals")
+    .send(newMeal)
+    .expect(400);
+
+  const mealsAtEnd = await helper.mealsInDb();
+  expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
+});
+
+test("a meal without time of day is not added", async () => {
+  const newMeal = {
+    name: "New meal",
+    group: helper.initialGroups[0].name,
+    numberOfDays: "1",
+  };
+
+  await api
+    .post("/api/meals")
+    .send(newMeal)
+    .expect(400);
+
+  const mealsAtEnd = await helper.mealsInDb();
+  expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
+});
+
+test("a meal without number of days is not added", async () => {
+  const newMeal = {
+    name: "New meal",
+    group: helper.initialGroups[0].name,
+    timeOfDay: "Lunch",
+  };
+
+  await api
+    .post("/api/meals")
+    .send(newMeal)
+    .expect(400);
+
+  const mealsAtEnd = await helper.mealsInDb();
+  expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });

@@ -1,3 +1,5 @@
+const meal = require("../models/meal");
+
 const initialGroups = [
   {
     name: "Tortillas/Revueltos",
@@ -36,4 +38,10 @@ const populateMeals = async (savedGroups) => {
   return mealsWithGroupId;
 };
 
-module.exports = { initialMeals, initialGroups, populateMeals };
+const mealsInDb = async () => {
+  const meals = await meal.find({});
+
+  return meals.map(meal => meal.toJSON());
+};
+
+module.exports = { initialMeals, initialGroups, populateMeals, mealsInDb };
