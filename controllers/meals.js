@@ -2,15 +2,12 @@ const mealsRouter = require("express").Router();
 const Meal = require("../models/meal");
 const Group = require("../models/group");
 
-mealsRouter.get("/", (req, res) => {
-  Meal.find({})
-    .populate("group")
-    .then((meals) => {
-      res.json(meals);
-    });
+mealsRouter.get("/", async (req, res) => {
+  const meals = await Meal.find({}).populate("group");
+  res.json(meals);
 });
 
-mealsRouter.get("/:id", (req, res) => {
+mealsRouter.get("/:id", (req, res, next) => {
   Meal.findById(req.params.id)
     .populate("group")
     .then((meal) => {
@@ -23,15 +20,15 @@ mealsRouter.get("/:id", (req, res) => {
     .catch((error) => next(error));
 });
 
-mealsRouter.delete("/:id", (req, res) => {
+mealsRouter.delete("/:id", (req, res, next) => {
   Meal.findByIdAndRemove(req.params.id)
-    .then((result) => {
+    .then(() => {
       res.status(204).end();
     })
     .catch((error) => next(error));
 });
 
-mealsRouter.post("/", (req, res) => {
+mealsRouter.post("/", (req, res, next) => {
   const body = req.body;
 
   Group.findOne({ name: body.group }).then((group) => {
@@ -53,7 +50,7 @@ mealsRouter.post("/", (req, res) => {
   });
 });
 
-mealsRouter.put("/:id", (req, res) => {
+mealsRouter.put("/:id", (req, res, next) => {
   const body = req.body;
 
   Group.findOne({ name: body.group }).then((group) => {
