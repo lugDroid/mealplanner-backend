@@ -127,6 +127,53 @@ test("a meal without number of days is not added", async () => {
   expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
 });
 
+test("a specific meal can be viewed", async () => {
+  const mealsAtStart = await helper.mealsInDb();
+  const mealToView = mealsAtStart[0];
+
+  const resultMeal = await api
+    .get(`/api/meals/${mealToView.id}`)
+    .expect(200)
+    .expect("Content-Type", /application\/json/);
+
+  expect(resultMeal.body.name).toEqual(mealToView.name);
+  expect(resultMeal.body.numberOfDays).toEqual(mealToView.numberOfDays);
+  expect(resultMeal.body.timeOfDay).toEqual(mealToView.timeOfDay);
+});
+
+test("a meal can be deleted", async () => {
+  const mealsAtStart = await helper.mealsInDb();
+  const mealToDelete = mealsAtStart[0];
+
+  await api
+    .delete(`/api/meals/${mealToDelete.id}`)
+    .expect(204);
+
+  const mealsAtEnd = await helper.mealsInDb();
+
+  expect(mealsAtEnd).toHaveLength(helper.initialMeals.length - 1);
+
+  const names = mealsAtEnd.map(m => m.name);
+  expect(names).not.toContain(mealToDelete.name);
+});
+
+test("a meal name can be modified", async () => {
+  const mealsAtStart = await helper.mealsInDb();
+  const mealToModify = mealsAtStart[0];
+
+  mealToModify.name = "Modified name";
+
+  await api
+    .put(`/api/meals/${mealToModify.id}`)
+    .send(mealToModify)
+    .expect(200);
+
+  const mealsAtEnd = await helper.mealsInDb();
+  const names = mealsAtEnd.map(m => m.name);
+
+  expect(names).toContain(mealToModify.name);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });

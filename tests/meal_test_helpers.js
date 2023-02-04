@@ -1,4 +1,5 @@
-const meal = require("../models/meal");
+const Group = require("../models/group");
+const Meal = require("../models/meal");
 
 const initialGroups = [
   {
@@ -39,9 +40,22 @@ const populateMeals = async (savedGroups) => {
 };
 
 const mealsInDb = async () => {
-  const meals = await meal.find({});
+  const meals = await Meal.find({});
+  const mealsWithGroupName = [];
 
-  return meals.map(meal => meal.toJSON());
+  for (const meal of meals) {
+    const group = await Group.findById(meal.group);
+
+    mealsWithGroupName.push({
+      id: meal._id,
+      name: meal.name,
+      group: group.name,
+      timeOfDay: meal.timeOfDay,
+      numberOfDays: meal.numberOfDays,
+    });
+  }
+
+  return mealsWithGroupName; //.map(meal => meal.toJSON());
 };
 
 module.exports = { initialMeals, initialGroups, populateMeals, mealsInDb };
