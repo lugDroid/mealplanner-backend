@@ -8,11 +8,7 @@ const api = supertest(app);
 
 beforeEach(async () => {
   await Group.deleteMany({});
-
-  const groupObjects = helper.initialGroups.map(g => new Group(g));
-
-  const promiseArray = groupObjects.map(g => g.save());
-  await Promise.all(promiseArray);
+  await Group.insertMany(helper.initialGroups);
 });
 
 test("groups are returned as json", async () => {

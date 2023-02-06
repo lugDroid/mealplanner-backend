@@ -9,17 +9,12 @@ const api = supertest(app);
 
 beforeEach(async () => {
   await Group.deleteMany({});
+  await Group.insertMany(helper.initialGroups);
+
   await Meal.deleteMany({});
-
-  const groupObjects = helper.initialGroups.map(g => new Group(g));
-  const groupPromiseArray = groupObjects.map(g => g.save());
-  await Promise.all(groupPromiseArray);
-
   const savedGroups = await Group.find({});
   const populatedMeals = await helper.populateMeals(savedGroups);
-  const mealObjects = populatedMeals.map(m => new Meal(m));
-  const mealPromiseArray = mealObjects.map(m => m.save());
-  await Promise.all(mealPromiseArray);
+  await Meal.insertMany(populatedMeals);
 });
 
 test("meals are returned as json", async () => {
