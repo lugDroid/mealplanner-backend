@@ -7,25 +7,20 @@ mealsRouter.get("/", async (req, res) => {
   res.json(meals);
 });
 
-mealsRouter.get("/:id", (req, res, next) => {
-  Meal.findById(req.params.id)
-    .populate("group")
-    .then((meal) => {
-      if (meal) {
-        res.json(meal);
-      } else {
-        res.status(404).end();
-      }
-    })
-    .catch((error) => next(error));
+mealsRouter.get("/:id", async (req, res) => {
+  const meal = await Meal.findById(req.params.id).populate("group");
+
+  if (meal) {
+    res.json(meal);
+  } else {
+    res.status(404).end();
+  }
 });
 
-mealsRouter.delete("/:id", (req, res, next) => {
-  Meal.findByIdAndRemove(req.params.id)
-    .then(() => {
-      res.status(204).end();
-    })
-    .catch((error) => next(error));
+mealsRouter.delete("/:id", async (req, res) => {
+  await Meal.findByIdAndRemove(req.params.id);
+
+  res.status(204).end();
 });
 
 mealsRouter.post("/", async (req, res) => {
@@ -65,30 +60,27 @@ mealsRouter.post("/", async (req, res) => {
   res.status(201).json(savedMeal);
 });
 
-mealsRouter.put("/:id", (req, res, next) => {
+mealsRouter.put("/:id", async (req, res) => {
   const body = req.body;
 
-  Group.findOne({ name: body.group }).then((group) => {
-    body.group = group.id;
+  const group = await Group.findOne({ name: body.group });
+  body.group = group.id;
 
-    const modifiedMeal = {
-      name: body.name,
-      group: body.group,
-      timeOfDay: body.timeOfDay,
-      numberOfDays: body.numberOfDays,
-    };
+  const modifiedMeal = {
+    name: body.name,
+    group: body.group,
+    timeOfDay: body.timeOfDay,
+    numberOfDays: body.numberOfDays,
+  };
 
-    Meal.findByIdAndUpdate(req.params.id, modifiedMeal, {
-      new: true,
-      runValidators: true,
-      context: "query",
-    })
-      .populate("group")
-      .then((updatedMeal) => {
-        res.json(updatedMeal);
-      })
-      .catch((error) => next(error));
-  });
+  const updatedMeal = await Meal.findByIdAndUpdate(req.params.id, modifiedMeal, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  }).populate("group");
+
+  res.json(updatedMeal);
+
 });
 
 module.exports = mealsRouter;
