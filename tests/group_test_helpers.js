@@ -12,7 +12,7 @@ const initialGroups = [
 ];
 
 const nonExistingId = async () => {
-  const group = new group({
+  const group = new Group({
     name: "To be removed",
     weeklyRations: 0,
   });
