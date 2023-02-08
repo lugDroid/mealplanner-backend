@@ -1,0 +1,11 @@
+GET http://localhost:8080/api/users
+
+###
+POST http://localhost:8080/api/users
+content-type: application/json
+
+{
+  "username": "root",
+  "name": "Superuser",
+  "password": "superuser"
+}

@@ -9,7 +9,8 @@ content-type: application/json
 
 {
   "name": "Test Group",
-  "weeklyRations": 4
+  "weeklyRations": 4,
+  "userId": "63e34ac70e3ec9b1f3cca6dc"
 }
 
 ###

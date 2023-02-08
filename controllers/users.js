@@ -1,8 +1,18 @@
 const bcrypt = require("bcrypt");
-const userRouter = require("express").Router();
+const usersRouter = require("express").Router();
 const User = require("../models/users");
 
-userRouter.post("/", async (req, res) => {
+usersRouter.get("/", async (req, res) => {
+  const users = await User
+    .find({})
+    .populate("groups", { name: 1, weeklyRations: 1 })
+    .populate("meals")
+    .populate("plans");
+
+  res.json(users);
+});
+
+usersRouter.post("/", async (req, res) => {
   const { username, name, password } = req.body;
 
   const saltRounds = 10;
@@ -19,4 +29,4 @@ userRouter.post("/", async (req, res) => {
   res.status(201).json(savedUser);
 });
 
-module.exports = userRouter;
+module.exports = usersRouter;

@@ -1,8 +1,10 @@
 const groupsRouter = require("express").Router();
 const Group = require("../models/group");
+const User = require("../models/users");
 
 groupsRouter.get("/", (req, res, next) => {
   Group.find({})
+    .populate("user", { username: 1, name: 1 })
     .then(groups => {
       res.json(groups);
     })
@@ -32,13 +34,18 @@ groupsRouter.delete("/:id", async (req, res) => {
 
 groupsRouter.post("/", async (req, res) => {
   const body = req.body;
+  const user = await User.findById(body.userId);
 
   const group = new Group({
     name: body.name,
     weeklyRations: body.weeklyRations,
+    user: user._id,
   });
 
   const savedGroup = await group.save();
+  user.groups = user.groups.concat(savedGroup._id);
+  await user.save();
+
   res.status(201).json(savedGroup);
 });
 
