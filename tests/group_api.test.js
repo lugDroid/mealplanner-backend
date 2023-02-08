@@ -54,12 +54,12 @@ describe("viewing a specific group", () => {
       .expect(404);
   });
 
-  test("fails with statuscode 404 if id is invalid", async () => {
-    const invalidId = "5a3d5da59070081a82a3445";
+  test("fails with statuscode 400 if id is invalid", async () => {
+    const invalidId = "nonValidId";
 
     await api
-      .get(`/api/notes/${invalidId}`)
-      .expect(404);
+      .get(`/api/groups/${invalidId}`)
+      .expect(400);
   });
 });
 

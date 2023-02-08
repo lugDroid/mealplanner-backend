@@ -1,6 +1,7 @@
 const groupsRouter = require("express").Router();
 const Group = require("../models/group");
 const User = require("../models/users");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 groupsRouter.get("/", (req, res, next) => {
   Group.find({})
@@ -18,6 +19,10 @@ groupsRouter.get("/", (req, res, next) => {
 });
 
 groupsRouter.get("/:id", async (req, res) => {
+  if (!ObjectId.isValid(req.params.id)) {
+    res.status(400).end();
+  }
+
   const group = await Group.findById(req.params.id);
 
   if (group) {
