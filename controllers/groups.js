@@ -68,7 +68,11 @@ groupsRouter.put("/:id", async (req, res) => {
     context: "query",
   });
 
-  res.json(updatedGroup);
+  if (updatedGroup) {
+    res.json(updatedGroup);
+  } else {
+    res.status(404).end();
+  }
 });
 
 module.exports = groupsRouter;

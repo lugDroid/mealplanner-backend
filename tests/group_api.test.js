@@ -116,8 +116,21 @@ describe("deletion of a group", () => {
     expect(names).not.toContain(groupToDelete.name);
   });
 
-  // TODO: Add test for cases when valid id does not exists and
-  // for when id is invalid
+  test("fails with status code 404 if group does not exist", async () => {
+    const validNonExistingId = await helper.nonExistingId();
+
+    await api
+      .get(`/api/groups/${validNonExistingId}`)
+      .expect(404);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const invalidId = "nonValidId";
+
+    await api
+      .get(`/api/groups/${invalidId}`)
+      .expect(400);
+  });
 });
 
 describe("modifying a group", () => {
@@ -138,8 +151,37 @@ describe("modifying a group", () => {
     expect(names).toContain(groupToModify.name);
   });
 
-  // TODO: Add test for cases when valid id does not exists and
-  // for when id is invalid
+  test("fails with status code 404 if group does not exist", async () => {
+    const groupsAtStart = await helper.groupsInDb();
+    const groupToModify = groupsAtStart[0];
+    const validNonExistingId = await helper.nonExistingId();
+
+    groupToModify.name = "Modified name";
+
+    await api
+      .put(`/api/groups/${validNonExistingId}`)
+      .send(groupToModify)
+      .expect(404);
+
+    const groupsAtEnd = await helper.groupsInDb();
+    expect(groupsAtStart).toHaveLength(groupsAtEnd.length);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const groupsAtStart = await helper.groupsInDb();
+    const groupToModify = groupsAtStart[0];
+    const invalidId = "nonValidId";
+
+    groupToModify.name = "Modified name";
+
+    await api
+      .put(`/api/groups/${invalidId}`)
+      .send(groupToModify)
+      .expect(400);
+
+    const groupsAtEnd = await helper.groupsInDb();
+    expect(groupsAtStart).toHaveLength(groupsAtEnd.length);
+  });
 });
 
 afterAll(() => {
