@@ -3,19 +3,9 @@ const Group = require("../models/group");
 const User = require("../models/users");
 const ObjectId = require("mongoose").Types.ObjectId;
 
-groupsRouter.get("/", (req, res, next) => {
-  Group.find({})
-    .populate("user", { username: 1, name: 1 })
-    .then(groups => {
-      res.json(groups);
-    })
-    .catch((error) => next(error));
-  /*   try {
-      const groups = Group.find({});
-      res.json(groups);
-    } catch (exception) {
-      next(exception);
-    } */
+groupsRouter.get("/", async (req, res) => {
+  const groups = await Group.find({}).populate("user", { username: 1, name: 1 });
+  res.json(groups);
 });
 
 groupsRouter.get("/:id", async (req, res) => {
