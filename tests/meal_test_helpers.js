@@ -58,4 +58,18 @@ const mealsInDb = async () => {
   return mealsWithGroupName; //.map(meal => meal.toJSON());
 };
 
-module.exports = { initialMeals, initialGroups, populateMeals, mealsInDb };
+const nonExistingId = async () => {
+  const meal = new Meal({
+    name: "To be removed",
+    group: "507f1f77bcf86cd799439011",
+    timeOfDay: "Lunch",
+    numberOfDays: 0,
+  });
+
+  await meal.save();
+  await meal.remove();
+
+  return meal._id.toString();
+};
+
+module.exports = { initialMeals, initialGroups, populateMeals, mealsInDb, nonExistingId };

@@ -54,8 +54,21 @@ describe("viewing a specific meal", () => {
     expect(resultMeal.body.timeOfDay).toEqual(mealToView.timeOfDay);
   });
 
-  // TODO: Add test for non existing group
-  // TODO: Add test for non valid id 
+  test("fails with status code 404 if meal does not exist", async () => {
+    const validNonExistingId = await helper.nonExistingId();
+
+    await api
+      .get(`/api/meals/${validNonExistingId}`)
+      .expect(404);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const invalidId = "nonValidId";
+
+    await api
+      .get(`/api/meals/${invalidId}`)
+      .expect(400);
+  });
 });
 
 describe("addition of a new meal", () => {
@@ -162,8 +175,29 @@ describe("deletion of a meal", () => {
     expect(names).not.toContain(mealToDelete.name);
   });
 
-  // TODO: Add test for non existing group
-  // TODO: Add test for non valid id 
+  test("fails with status code 404 if meal does not exist", async () => {
+    const mealsAtStart = await helper.mealsInDb();
+    const validNonExistingId = await helper.nonExistingId();
+
+    await api
+      .delete(`/api/meals/${validNonExistingId}`)
+      .expect(404);
+
+    const mealsAtEnd = await helper.mealsInDb();
+    expect(mealsAtStart).toHaveLength(mealsAtEnd.length);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const mealsAtStart = await helper.mealsInDb();
+    const invalidId = "nonValidId";
+
+    await api
+      .get(`/api/meals/${invalidId}`)
+      .expect(400);
+
+    const mealsAtEnd = await helper.mealsInDb();
+    expect(mealsAtStart).toHaveLength(mealsAtEnd.length);
+  });
 });
 
 describe("modifying a meal", () => {
@@ -184,8 +218,31 @@ describe("modifying a meal", () => {
     expect(names).toContain(mealToModify.name);
   });
 
-  // TODO: Add test for non existing group
-  // TODO: Add test for non valid id 
+  test("fails with status code 404 if meal does not exists", async () => {
+    const mealsAtStart = await helper.mealsInDb();
+    const validNonExistingId = await helper.nonExistingId();
+    const mealToModify = mealsAtStart[0];
+
+    mealToModify.name = "Modified name";
+
+    await api
+      .put(`/api/meals/${validNonExistingId}`)
+      .send(mealToModify)
+      .expect(404);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const mealsAtStart = await helper.mealsInDb();
+    const invalidId = "nonValidId";
+    const mealToModify = mealsAtStart[0];
+
+    mealToModify.name = "Modified name";
+
+    await api
+      .put(`/api/meals/${invalidId}`)
+      .send(mealToModify)
+      .expect(400);
+  });
 });
 
 

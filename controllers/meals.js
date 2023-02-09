@@ -18,7 +18,11 @@ mealsRouter.get("/:id", async (req, res) => {
 });
 
 mealsRouter.delete("/:id", async (req, res) => {
-  await Meal.findByIdAndRemove(req.params.id);
+  const foundMeal = await Meal.findByIdAndRemove(req.params.id);
+
+  if (!foundMeal) {
+    res.status(404).end();
+  }
 
   res.status(204).end();
 });
@@ -79,8 +83,11 @@ mealsRouter.put("/:id", async (req, res) => {
     context: "query",
   }).populate("group");
 
-  res.json(updatedMeal);
-
+  if (updatedMeal) {
+    res.json(updatedMeal);
+  } else {
+    res.status(404).end();
+  }
 });
 
 module.exports = mealsRouter;
