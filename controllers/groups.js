@@ -29,6 +29,11 @@ groupsRouter.delete("/:id", async (req, res) => {
 
 groupsRouter.post("/", async (req, res) => {
   const body = req.body;
+
+  if (!req.body.userId) {
+    res.status(400).end();
+  }
+
   const user = await User.findById(body.userId);
 
   const group = new Group({
