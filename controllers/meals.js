@@ -40,6 +40,11 @@ mealsRouter.post("/", async (req, res) => {
     throw Error("group required");
   }
 
+  if (!body.userId) {
+    res.status(400).end();
+    throw Error("user required");
+  }
+
   if (!body.timeOfDay) {
     res.status(400).end();
     throw Error("time of day required");
@@ -55,6 +60,7 @@ mealsRouter.post("/", async (req, res) => {
   const newMeal = new Meal({
     name: body.name,
     group: body.group,
+    userId: body.userId,
     timeOfDay: body.timeOfDay,
     numberOfDays: body.numberOfDays,
   });

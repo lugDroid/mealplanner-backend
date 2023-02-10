@@ -1,12 +1,15 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
-const helper = require("./group_test_helpers");
+const helper = require("./test_helpers");
 const app = require("../app");
 const Group = require("../models/group");
+const User = require("../models/users");
 
 const api = supertest(app);
 
 beforeEach(async () => {
+  await User.deleteMany({});
+  await User.insertMany(helper.initialUsers);
   await Group.deleteMany({});
   await Group.insertMany(helper.initialGroups);
 });
@@ -29,7 +32,7 @@ describe("when there is initially some groups saved", () => {
     const res = await api.get("/api/groups");
 
     const names = res.body.map(r => r.name);
-    expect(names).toContain("Group B");
+    expect(names).toContain(helper.initialGroups[0].name);
   });
 });
 
@@ -65,9 +68,12 @@ describe("viewing a specific group", () => {
 
 describe("addition of a new group", () => {
   test("succeeds with valid data", async () => {
+    const users = await helper.usersInDb();
+
     const newGroup = {
       name: "New group",
       weeklyRations: 1,
+      userId: users[0].id
     };
 
     await api
@@ -83,9 +89,28 @@ describe("addition of a new group", () => {
     expect(names).toContain("New group");
   });
 
-  test("fails with statuscode 400 if name is invalid", async () => {
+  test("fails with status code 400 if name is missing", async () => {
+    const users = await helper.usersInDb();
+
     const newGroup = {
       weeklyRations: 1,
+      userId: users[0].id
+    };
+
+    await api
+      .post("/api/groups")
+      .send(newGroup)
+      .expect(400);
+
+    const groupsAtEnd = await helper.groupsInDb();
+
+    expect(groupsAtEnd).toHaveLength(helper.initialGroups.length);
+  });
+
+  test("fails with status code 400 if user is missing", async () => {
+    const newGroup = {
+      name: "Test Group",
+      weeklyRations: 1
     };
 
     await api

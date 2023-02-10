@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
-const helper = require("./meal_test_helpers");
+const helper = require("./test_helpers");
 const app = require("../app");
 const Meal = require("../models/meal");
 const Group = require("../models/group");
+const User = require("../models/users");
 
 const api = supertest(app);
 
 beforeEach(async () => {
+  await User.deleteMany({});
+  await User.insertMany(helper.initialUsers);
   await Group.deleteMany({});
   await Group.insertMany(helper.initialGroups);
 
@@ -35,7 +38,7 @@ describe("when there is initially some meals saved", () => {
     const res = await api.get("/api/meals");
 
     const names = res.body.map((r) => r.name);
-    expect(names).toContain("Pasta con carne y bechamel");
+    expect(names).toContain(helper.initialMeals[0].name);
   });
 });
 
@@ -73,9 +76,11 @@ describe("viewing a specific meal", () => {
 
 describe("addition of a new meal", () => {
   test("succeeds with valid data", async () => {
+    const users = await helper.usersInDb();
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
+      userId: users[0].id,
       timeOfDay: "Lunch",
       numberOfDays: "1",
     };
@@ -94,8 +99,11 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if name is not included", async () => {
+    const users = await helper.usersInDb();
+
     const newMeal = {
       group: helper.initialGroups[0].name,
+      userId: users[0].id,
       timeOfDay: "Lunch",
       numberOfDays: "1",
     };
@@ -110,8 +118,28 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if group is not included", async () => {
+    const users = await helper.usersInDb();
+
     const newMeal = {
       name: "New meal",
+      userId: users[0].id,
+      timeOfDay: "Lunch",
+      numberOfDays: "1",
+    };
+
+    await api
+      .post("/api/meals")
+      .send(newMeal)
+      .expect(400);
+
+    const mealsAtEnd = await helper.mealsInDb();
+    expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
+  });
+
+  test("fails with status code 400 if user id is not included", async () => {
+    const newMeal = {
+      name: "New meal",
+      group: helper.initialGroups[0].name,
       timeOfDay: "Lunch",
       numberOfDays: "1",
     };
@@ -126,9 +154,12 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if time of day is not included", async () => {
+    const users = await helper.usersInDb();
+
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
+      userId: users[0].id,
       numberOfDays: "1",
     };
 
@@ -142,9 +173,12 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if number of days is not included", async () => {
+    const users = await helper.usersInDb();
+
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
+      userId: users[0].id,
       timeOfDay: "Lunch",
     };
 

@@ -1,31 +1,58 @@
 const Group = require("../models/group");
 const Meal = require("../models/meal");
+const User = require("../models/users");
+
+const initialUsers = [
+  {
+    username: "root",
+    name: "Root User",
+    password: "rootuser"
+  }
+];
 
 const initialGroups = [
   {
-    name: "Tortillas/Revueltos",
+    name: "Group A",
     weeklyRations: 6,
   },
   {
-    name: "Pasta",
+    name: "Group B",
     weeklyRations: 4,
   },
 ];
 
 const initialMeals = [
   {
-    name: "Pasta con carne y bechamel",
-    group: "Pasta",
+    name: "Meal A",
+    group: "Group A",
     timeOfDay: "Lunch",
     numberOfDays: 2,
   },
   {
-    name: "Tortilla de patatas",
-    group: "Tortillas/Revueltos",
+    name: "Meal B",
+    group: "Group B",
     timeOfDay: "Dinner",
     numberOfDays: 1,
   },
 ];
+
+const usersInDb = async () => {
+  const users = await User.find({});
+
+  return users.map(user => user.toJSON());
+};
+
+const nonExistingId = async () => {
+  const group = new Group({
+    name: "To be removed",
+    weeklyRations: 0,
+  });
+
+  await group.save();
+  await group.remove();
+
+  return group._id.toString();
+};
 
 const populateMeals = async (savedGroups) => {
   const mealsWithGroupId = [];
@@ -58,18 +85,19 @@ const mealsInDb = async () => {
   return mealsWithGroupName; //.map(meal => meal.toJSON());
 };
 
-const nonExistingId = async () => {
-  const meal = new Meal({
-    name: "To be removed",
-    group: "507f1f77bcf86cd799439011",
-    timeOfDay: "Lunch",
-    numberOfDays: 0,
-  });
+const groupsInDb = async () => {
+  const groups = await Group.find({});
 
-  await meal.save();
-  await meal.remove();
-
-  return meal._id.toString();
+  return groups.map(group => group.toJSON());
 };
 
-module.exports = { initialMeals, initialGroups, populateMeals, mealsInDb, nonExistingId };
+module.exports = {
+  initialUsers,
+  initialMeals,
+  initialGroups,
+  usersInDb,
+  populateMeals,
+  mealsInDb,
+  nonExistingId,
+  groupsInDb
+};
