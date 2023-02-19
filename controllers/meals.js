@@ -1,6 +1,7 @@
 const mealsRouter = require("express").Router();
 const Meal = require("../models/meal");
 const Group = require("../models/group");
+const User = require("../models/users");
 
 mealsRouter.get("/", async (req, res) => {
   const meals = await Meal.find({}).populate("group");
@@ -54,8 +55,9 @@ mealsRouter.post("/", async (req, res) => {
     res.status(400).end();
     throw Error("number of days required");
   }
-
+  const user = await User.findById(body.userId);
   const group = await Group.findOne({ name: body.group });
+
   body.group = group._id;
   const newMeal = new Meal({
     name: body.name,
@@ -63,10 +65,15 @@ mealsRouter.post("/", async (req, res) => {
     userId: body.userId,
     timeOfDay: body.timeOfDay,
     numberOfDays: body.numberOfDays,
+    user: user._id
   });
 
-  const savedMeal = newMeal.save();
+  const savedMeal = await newMeal.save();
   savedMeal.group = group;
+
+  user.meals = user.meals.concat(savedMeal._id);
+  await user.save();
+
   res.status(201).json(savedMeal);
 });
 

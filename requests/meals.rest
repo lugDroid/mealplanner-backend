@@ -8,10 +8,11 @@ POST http://localhost:8080/api/meals
 content-type: application/json
 
 {
-  "name": "Test Meal",
-  "group": "Pescado",
+  "name": "Test Meal 3",
+  "group": "Test Group",
   "timeOfDay": "Any",
-  "numberOfDays": 1
+  "numberOfDays": 1,
+  "userId": "63f1b8f10ce699c3db841c70"
 }
 
 ###
