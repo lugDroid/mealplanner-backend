@@ -43,9 +43,11 @@ const usersInDb = async () => {
 };
 
 const nonExistingId = async () => {
+  const user = await usersInDb();
   const group = new Group({
     name: "To be removed",
     weeklyRations: 0,
+    user: user[0].id
   });
 
   await group.save();
@@ -54,16 +56,30 @@ const nonExistingId = async () => {
   return group._id.toString();
 };
 
-const populateMeals = async (savedGroups) => {
-  const mealsWithGroupId = [];
+const groupsWithUsersInfo = async (savedUsers) => {
+  const groupsWithUsers = [];
+
+  for (const group of initialGroups) {
+    // assign random user
+    const user = savedUsers[0];
+    const groupWithUser = { ...group, user: user.id };
+    groupsWithUsers.push(groupWithUser);
+  }
+
+  return groupsWithUsers;
+};
+
+const mealsWithGroupInfo = async (savedGroups) => {
+  const mealsWithGroups = [];
 
   for (const meal of initialMeals) {
     const group = savedGroups.find(g => g.name == meal.group);
-    const mealWithGroupId = { ...meal, group: group._id.toString() };
-    mealsWithGroupId.push(mealWithGroupId);
+
+    const mealWithGroup = { ...meal, group: group.id.toString(), user: group.user };
+    mealsWithGroups.push(mealWithGroup);
   }
 
-  return mealsWithGroupId;
+  return mealsWithGroups;
 };
 
 const mealsInDb = async () => {
@@ -96,8 +112,9 @@ module.exports = {
   initialMeals,
   initialGroups,
   usersInDb,
-  populateMeals,
+  groupsInDb,
   mealsInDb,
   nonExistingId,
-  groupsInDb
+  mealsWithGroupInfo,
+  groupsWithUsersInfo
 };

@@ -11,13 +11,16 @@ const api = supertest(app);
 beforeEach(async () => {
   await User.deleteMany({});
   await User.insertMany(helper.initialUsers);
+
   await Group.deleteMany({});
-  await Group.insertMany(helper.initialGroups);
+  const savedUsers = await helper.usersInDb();
+  const groupsToAdd = await helper.groupsWithUsersInfo(savedUsers);
+  await Group.insertMany(groupsToAdd);
 
   await Meal.deleteMany({});
-  const savedGroups = await Group.find({});
-  const populatedMeals = await helper.populateMeals(savedGroups);
-  await Meal.insertMany(populatedMeals);
+  const savedGroups = await helper.groupsInDb();
+  const mealsToAdd = await helper.mealsWithGroupInfo(savedGroups);
+  await Meal.insertMany(mealsToAdd);
 });
 
 describe("when there is initially some meals saved", () => {
