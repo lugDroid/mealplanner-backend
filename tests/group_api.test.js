@@ -10,8 +10,11 @@ const api = supertest(app);
 beforeEach(async () => {
   await User.deleteMany({});
   await User.insertMany(helper.initialUsers);
+
   await Group.deleteMany({});
-  await Group.insertMany(helper.initialGroups);
+  const savedUsers = await helper.usersInDb();
+  const groupsToAdd = await helper.groupsWithUsersInfo(savedUsers);
+  await Group.insertMany(groupsToAdd);
 });
 
 describe("when there is initially some groups saved", () => {
@@ -38,7 +41,7 @@ describe("when there is initially some groups saved", () => {
 
 describe("viewing a specific group", () => {
   test("succeeds with a valid id", async () => {
-    const groupsAtStart = await helper.groupsInDb();
+    const groupsAtStart = await await helper.groupsInDb();
     const groupToView = groupsAtStart[0];
 
     const resultGroup = await api

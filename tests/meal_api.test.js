@@ -122,7 +122,6 @@ describe("addition of a new meal", () => {
 
   test("fails with status code 400 if group is not included", async () => {
     const users = await helper.usersInDb();
-
     const newMeal = {
       name: "New meal",
       userId: users[0].id,

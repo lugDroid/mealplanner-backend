@@ -75,7 +75,7 @@ const mealsWithGroupInfo = async (savedGroups) => {
   for (const meal of initialMeals) {
     const group = savedGroups.find(g => g.name == meal.group);
 
-    const mealWithGroup = { ...meal, group: group.id.toString(), user: group.user };
+    const mealWithGroup = { ...meal, group: group.id.toString(), user: group.user.id.toString() };
     mealsWithGroups.push(mealWithGroup);
   }
 
@@ -102,7 +102,7 @@ const mealsInDb = async () => {
 };
 
 const groupsInDb = async () => {
-  const groups = await Group.find({});
+  let groups = await Group.find({}).populate("user", { username: 1, name: 1 });
 
   return groups.map(group => group.toJSON());
 };
