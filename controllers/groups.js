@@ -13,7 +13,7 @@ groupsRouter.get("/:id", async (req, res) => {
     res.status(400).end();
   }
 
-  const group = await Group.findById(req.params.id);
+  const group = await Group.findById(req.params.id).populate("user", { username: 1, name: 1 });
 
   if (group) {
     res.json(group);
@@ -43,10 +43,11 @@ groupsRouter.post("/", async (req, res) => {
   });
 
   const savedGroup = await group.save();
+  const populatedGroup = await Group.populate(savedGroup, { path: "user", select: { username: 1, name: 1 } });
   user.groups = user.groups.concat(savedGroup._id);
   await user.save();
 
-  res.status(201).json(savedGroup);
+  res.status(201).json(populatedGroup);
 });
 
 groupsRouter.put("/:id", async (req, res) => {
@@ -55,13 +56,14 @@ groupsRouter.put("/:id", async (req, res) => {
   const modifiedGroup = {
     name: body.name,
     weeklyRations: body.weeklyRations,
+    user: body.userId
   };
 
   const updatedGroup = await Group.findByIdAndUpdate(req.params.id, modifiedGroup, {
     new: true,
     runValidators: true,
     context: "query",
-  });
+  }).populate("user", { username: 1, name: 1 });
 
   if (updatedGroup) {
     res.json(updatedGroup);

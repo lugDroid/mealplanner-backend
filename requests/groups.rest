@@ -1,26 +1,27 @@
 GET http://localhost:8080/api/groups
 
 ###
-GET http://localhost:8080/api/groups/63a072e7f987df5ed7dd2e19
+GET http://localhost:8080/api/groups/63f1ba433cf80d9505cdc385
 
 ###
 POST http://localhost:8080/api/groups
 content-type: application/json
 
 {
-  "name": "Test Group",
+  "name": "Test Group 2",
   "weeklyRations": 4,
-  "userId": "63e34ac70e3ec9b1f3cca6dc"
+  "userId": "63f1b8f10ce699c3db841c70"
 }
 
 ###
-PUT http://localhost:8080/api/groups/63a072e7f987df5ed7dd2e19
+PUT http://localhost:8080/api/groups/63f384dcf82fba09bde8f7b8
 content-type: application/json
 
 {
-  "name": "Modified Test Group",
-  "weeklyRations": 4
+  "name": "Modified Test Group 22",
+  "weeklyRations": 4,
+  "userId": "63f1b8f10ce699c3db841c70"
 }
 
 ###
-DELETE http://localhost:8080/api/groups/63a072e7f987df5ed7dd2e19
+DELETE http://localhost:8080/api/groups/63f3843ea68f7dde1c26f2a8
