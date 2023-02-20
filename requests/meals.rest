@@ -16,15 +16,16 @@ content-type: application/json
 }
 
 ###
-PUT http://localhost:8080/api/meals/63a07320f987df5ed7dd2e24
+PUT http://localhost:8080/api/meals/63f3261df40654e624117393
 content-type: application/json
 
 {
-  "name": "Modified Test Meal",
-  "group": "Pescado",
+  "name": "Test Meal",
+  "group": "Test Group",
   "timeOfDay": "Any",
-  "numberOfDays": 1
+  "numberOfDays": 1,
+  "userId": "63f1b8f10ce699c3db841c70"
 }
 
 ###
-DELETE http://localhost:8080/api/meals/63a07320f987df5ed7dd2e24
+DELETE http://localhost:8080/api/meals/63f1bc381a4ab7fcb9ccd8bb
