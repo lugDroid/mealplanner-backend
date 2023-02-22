@@ -4,12 +4,17 @@ const Group = require("../models/group");
 const User = require("../models/users");
 
 mealsRouter.get("/", async (req, res) => {
-  const meals = await Meal.find({}).populate("group");
+  const meals = await Meal.find({})
+    .populate("group", { name: 1, weeklyRations: 1 })
+    .populate("user", { username: 1, name: 1 });
+
   res.json(meals);
 });
 
 mealsRouter.get("/:id", async (req, res) => {
-  const meal = await Meal.findById(req.params.id).populate("group");
+  const meal = await Meal.findById(req.params.id)
+    .populate("group", { name: 1, weeklyRations: 1 })
+    .populate("user", { username: 1, name: 1 });
 
   if (meal) {
     res.json(meal);
@@ -69,12 +74,16 @@ mealsRouter.post("/", async (req, res) => {
   });
 
   const savedMeal = await newMeal.save();
-  savedMeal.group = group;
+  const populatedMeal = await Meal
+    .populate(savedMeal, [
+      { path: "user", select: { username: 1, name: 1 } },
+      { path: "group", select: { name: 1, weeklyRations: 1 } }
+    ]);
 
   user.meals = user.meals.concat(savedMeal._id);
   await user.save();
 
-  res.status(201).json(savedMeal);
+  res.status(201).json(populatedMeal);
 });
 
 mealsRouter.put("/:id", async (req, res) => {
@@ -95,7 +104,8 @@ mealsRouter.put("/:id", async (req, res) => {
     new: true,
     runValidators: true,
     context: "query",
-  }).populate("group");
+  }).populate("group", { name: 1, weeklyRations: 1 })
+    .populate("user", { username: 1, name: 1 });
 
   if (updatedMeal) {
     res.json(updatedMeal);
