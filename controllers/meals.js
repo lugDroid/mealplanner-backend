@@ -25,6 +25,11 @@ mealsRouter.get("/:id", async (req, res) => {
 
 mealsRouter.delete("/:id", async (req, res) => {
   const foundMeal = await Meal.findByIdAndRemove(req.params.id);
+  const user = await User.findById(foundMeal.user);
+
+  // we also need to remove the meal from the user document
+  user.meals = user.meals.filter(mealId => mealId.toString() !== foundMeal.id);
+  await user.save();
 
   if (!foundMeal) {
     res.status(404).end();
@@ -62,6 +67,11 @@ mealsRouter.post("/", async (req, res) => {
   }
   const user = await User.findById(body.userId);
   const group = await Group.findOne({ name: body.group });
+
+  if (!group) {
+    res.status(400).end();
+    throw Error("existing group required");
+  }
 
   body.group = group._id;
   const newMeal = new Meal({
