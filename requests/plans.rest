@@ -1,7 +1,7 @@
 GET http://localhost:8080/api/plans
 
 ###
-GET http://localhost:8080/api/plans/63a07365f987df5ed7dd2e41
+GET http://localhost:8080/api/plans/63f71a011077ccaaec7a9ed8
 
 ###
 POST http://localhost:8080/api/plans
@@ -10,49 +10,51 @@ Content-Type: application/json
 {
   "name": "Test Plan",
   "lunch": [
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas", 
-    "Tortilla de calabacin",
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas" 
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal" 
   ],
   "dinner": [
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas", 
-    "Tortilla de calabacin",
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas"
-    ]
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal"
+  ],
+  "userId": "63f1b8f10ce699c3db841c70"
 }
 
 ###
-PUT http://localhost:8080/api/plans/63a07365f987df5ed7dd2e41
+PUT http://localhost:8080/api/plans/63f71a011077ccaaec7a9ed8
 Content-Type: application/json
 
 {
   "name": "Modified Test Plan",
   "lunch": [
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas", 
-    "Tortilla de calabacin",
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas" 
+    "Test Meal 2", 
+    "Test Meal 2",
+    "Test Meal 2", 
+    "Test Meal 2",
+    "Test Meal 2", 
+    "Test Meal 2",
+    "Test Meal 2" 
   ],
   "dinner": [
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas", 
-    "Tortilla de calabacin",
-    "Tortilla de patatas", 
-    "Pruebe con huevos fritos",
-    "Fajitas tortillas"
-    ]
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal", 
+    "Test Meal",
+    "Test Meal"
+  ],
+  "userId": "63f1b8f10ce699c3db841c70"
 }
 
 ###

@@ -4,7 +4,7 @@ const planSchema = new mongoose.Schema({
   name: { type: String, minLength: 3, required: true },
   lunch: [{ type: mongoose.Schema.ObjectId, ref: "Meal" }],
   dinner: [{ type: mongoose.Schema.ObjectId, ref: "Meal" }],
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 });
 
 planSchema.set("toJSON", {

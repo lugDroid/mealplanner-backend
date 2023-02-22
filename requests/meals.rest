@@ -8,7 +8,7 @@ POST http://localhost:8080/api/meals
 content-type: application/json
 
 {
-  "name": "Test Meal 3",
+  "name": "Test Meal 2",
   "group": "Test Group",
   "timeOfDay": "Any",
   "numberOfDays": 1,
@@ -28,4 +28,4 @@ content-type: application/json
 }
 
 ###
-DELETE http://localhost:8080/api/meals/63f1bc381a4ab7fcb9ccd8bb
+DELETE http://localhost:8080/api/meals/63f7197751e5329c5c98a4a4
