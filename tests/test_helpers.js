@@ -82,6 +82,33 @@ const mealsWithGroupInfo = async (savedGroups) => {
   return mealsWithGroups;
 };
 
+const generatePlans = async (numberOfPlans) => {
+  const plans = [];
+  const meals = await mealsInDb();
+  const users = await usersInDb();
+
+  for (let i = 0; i < numberOfPlans; i++) {
+    const initialData = {
+      name: "Test Plan",
+      lunch: [],
+      dinner: [],
+    };
+
+    initialData.name = `${initialData.name} ${i}`;
+
+    for (let j = 0; j < 7; j++) {
+      initialData.lunch.push(meals[Math.floor(Math.random() * meals.length)].id);
+      initialData.dinner.push(meals[Math.floor(Math.random() * meals.length)].id);
+    }
+
+    initialData.user = users[Math.floor(Math.random() * users.length)].id;
+
+    plans.push(initialData);
+  }
+
+  return plans;
+};
+
 const mealsInDb = async () => {
   const meals = await Meal.find({});
   const mealsWithGroupName = [];
@@ -116,5 +143,6 @@ module.exports = {
   mealsInDb,
   nonExistingId,
   mealsWithGroupInfo,
-  groupsWithUsersInfo
+  groupsWithUsersInfo,
+  generatePlans
 };
