@@ -1,5 +1,6 @@
 const Group = require("../models/group");
 const Meal = require("../models/meal");
+const plan = require("../models/plan");
 const User = require("../models/users");
 
 const initialUsers = [
@@ -36,12 +37,6 @@ const initialMeals = [
   },
 ];
 
-const usersInDb = async () => {
-  const users = await User.find({});
-
-  return users.map(user => user.toJSON());
-};
-
 const nonExistingId = async () => {
   const user = await usersInDb();
   const group = new Group({
@@ -54,6 +49,57 @@ const nonExistingId = async () => {
   await group.remove();
 
   return group._id.toString();
+};
+
+const usersInDb = async () => {
+  const users = await User.find({});
+
+  return users.map(user => user.toJSON());
+};
+
+const groupsInDb = async () => {
+  let groups = await Group.find({}).populate("user", { username: 1, name: 1 });
+
+  return groups.map(group => group.toJSON());
+};
+
+const mealsInDb = async () => {
+  const meals = await Meal.find({});
+  const mealsWithGroupName = [];
+
+  for (const meal of meals) {
+    const group = await Group.findById(meal.group);
+
+    mealsWithGroupName.push({
+      id: meal._id,
+      name: meal.name,
+      group: group.name,
+      timeOfDay: meal.timeOfDay,
+      numberOfDays: meal.numberOfDays,
+    });
+  }
+
+  return mealsWithGroupName; //.map(meal => meal.toJSON());
+};
+
+const plansInDb = async () => {
+  const plans = await plan.find({})
+    .populate({
+      path: "lunch",
+      select: { name: 1, group: 1, timeOfDay: 1, numberOfDays: 1 },
+      populate: { path: "group", select: { name: 1 } },
+    })
+    .populate({
+      path: "dinner",
+      select: { name: 1, group: 1, timeOfDay: 1, numberOfDays: 1 },
+      populate: { path: "group", select: { name: 1 } },
+    })
+    .populate({
+      path: "user",
+      select: { username: 1, name: 1 }
+    });
+
+  return plans.map(plan => plan.toJSON());
 };
 
 const groupsWithUsersInfo = async (savedUsers) => {
@@ -109,40 +155,18 @@ const generatePlans = async (numberOfPlans) => {
   return plans;
 };
 
-const mealsInDb = async () => {
-  const meals = await Meal.find({});
-  const mealsWithGroupName = [];
 
-  for (const meal of meals) {
-    const group = await Group.findById(meal.group);
-
-    mealsWithGroupName.push({
-      id: meal._id,
-      name: meal.name,
-      group: group.name,
-      timeOfDay: meal.timeOfDay,
-      numberOfDays: meal.numberOfDays,
-    });
-  }
-
-  return mealsWithGroupName; //.map(meal => meal.toJSON());
-};
-
-const groupsInDb = async () => {
-  let groups = await Group.find({}).populate("user", { username: 1, name: 1 });
-
-  return groups.map(group => group.toJSON());
-};
 
 module.exports = {
   initialUsers,
-  initialMeals,
   initialGroups,
+  initialMeals,
+  nonExistingId,
   usersInDb,
   groupsInDb,
   mealsInDb,
-  nonExistingId,
-  mealsWithGroupInfo,
+  plansInDb,
   groupsWithUsersInfo,
+  mealsWithGroupInfo,
   generatePlans
 };
