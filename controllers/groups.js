@@ -24,13 +24,18 @@ groupsRouter.get("/:id", async (req, res) => {
 
 groupsRouter.delete("/:id", async (req, res) => {
   const removedGroup = await Group.findByIdAndRemove(req.params.id);
-  const user = await User.findById(removedGroup.user);
 
-  // we also need to remove the group from the user document
-  user.groups = user.groups.filter(groupId => groupId.toString() !== removedGroup.id);
-  await user.save();
+  if (removedGroup) {
+    const user = await User.findById(removedGroup.user);
 
-  res.status(204).end();
+    // we also need to remove the group from the user document
+    user.groups = user.groups.filter(groupId => groupId.toString() !== removedGroup.id);
+    await user.save();
+
+    res.status(204).end();
+  }
+
+  res.status(404).end();
 });
 
 groupsRouter.post("/", async (req, res) => {

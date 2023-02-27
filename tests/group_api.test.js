@@ -128,7 +128,7 @@ describe("addition of a new group", () => {
 });
 
 describe("deletion of a group", () => {
-  test("succeeds with statuscode 204 if id is valid", async () => {
+  test("succeeds with status code 204 if id is valid", async () => {
     const groupsAtStart = await helper.groupsInDb();
     const groupToDelete = groupsAtStart[0];
 
@@ -148,7 +148,7 @@ describe("deletion of a group", () => {
     const validNonExistingId = await helper.nonExistingId();
 
     await api
-      .get(`/api/groups/${validNonExistingId}`)
+      .delete(`/api/groups/${validNonExistingId}`)
       .expect(404);
   });
 
@@ -156,7 +156,7 @@ describe("deletion of a group", () => {
     const invalidId = "nonValidId";
 
     await api
-      .get(`/api/groups/${invalidId}`)
+      .delete(`/api/groups/${invalidId}`)
       .expect(400);
   });
 });
