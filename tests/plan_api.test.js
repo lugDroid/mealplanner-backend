@@ -90,8 +90,8 @@ describe("addition of a new plan", () => {
     const plansAtStart = await helper.plansInDb();
     const initialPlan = plansAtStart[0];
 
-    const modifiedPlan = {
-      name: "Modified plan",
+    const newPlan = {
+      name: "New plan",
       lunch: initialPlan.lunch.map(m => m.name),
       dinner: initialPlan.dinner.map(m => m.name),
       userId: initialPlan.user.id
@@ -99,7 +99,7 @@ describe("addition of a new plan", () => {
 
     await api
       .post("/api/plans")
-      .send(modifiedPlan)
+      .send(newPlan)
       .expect(201)
       .expect("Content-Type", /application\/json/);
 
@@ -107,7 +107,7 @@ describe("addition of a new plan", () => {
     const names = plansAtEnd.map(p => p.name);
 
     expect(plansAtEnd).toHaveLength(plansAtStart.length + 1);
-    expect(names).toContain(modifiedPlan.name);
+    expect(names).toContain(newPlan.name);
   });
 
   test("fails with status code 400 if name is not included", async () => {
@@ -152,6 +152,94 @@ describe("addition of a new plan", () => {
 
     expect(plansAtEnd).toHaveLength(plansAtStart.length);
     expect(names).not.toContain(modifiedPlan.name);
+  });
+
+  test("fails with status code 400 if lunch meals are not included", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const initialPlan = plansAtStart[0];
+
+    const modifiedPlan = {
+      name: "Modified plan",
+      dinner: initialPlan.dinner.map(m => m.name),
+      userId: initialPlan.user.id
+    };
+
+    await api
+      .post("/api/plans")
+      .send(modifiedPlan)
+      .expect(400);
+
+    const plansAtEnd = await helper.plansInDb();
+    const names = plansAtEnd.map(p => p.name);
+
+    expect(plansAtEnd).toHaveLength(plansAtStart.length);
+    expect(names).not.toContain(modifiedPlan.name);
+  });
+
+  test("fails with status code 400 if dinner meals are not included", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const initialPlan = plansAtStart[0];
+
+    const modifiedPlan = {
+      name: "Modified plan",
+      lunch: initialPlan.lunch.map(m => m.name),
+      userId: initialPlan.user.id
+    };
+
+    await api
+      .post("/api/plans")
+      .send(modifiedPlan)
+      .expect(400);
+
+    const plansAtEnd = await helper.plansInDb();
+    const names = plansAtEnd.map(p => p.name);
+
+    expect(plansAtEnd).toHaveLength(plansAtStart.length);
+    expect(names).not.toContain(modifiedPlan.name);
+  });
+});
+
+describe("deletion of a plan", () => {
+  test("succeeds with status code 204 if id is valid", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const planToDelete = plansAtStart[0];
+
+    await api
+      .delete(`/api/plans/${planToDelete.id}`)
+      .expect(204);
+
+    const plansAtEnd = await helper.plansInDb();
+
+    expect(plansAtEnd).toHaveLength(plansAtStart.length - 1);
+
+    const names = plansAtEnd.map(p => p.name);
+    expect(names).not.toContain(planToDelete.name);
+  });
+
+  test("fails with status code 404 if plan does not exists", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const validNonExistingId = await helper.nonExistingId();
+
+    await api
+      .delete(`/api/plans/${validNonExistingId}`)
+      .expect(404);
+
+    const plansAtEnd = await helper.plansInDb();
+
+    expect(plansAtEnd).toHaveLength(plansAtStart.length);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const invalidId = "nonValidId";
+
+    await api
+      .delete(`/api/plans/${invalidId}`)
+      .expect(400);
+
+    const plansAtEnd = await helper.plansInDb();
+
+    expect(plansAtEnd).toHaveLength(plansAtStart.length);
   });
 });
 

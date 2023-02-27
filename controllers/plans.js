@@ -54,13 +54,18 @@ plansRouter.get("/:id", async (req, res) => {
 
 plansRouter.delete("/:id", async (req, res) => {
   const removedPlan = await Plan.findByIdAndRemove(req.params.id);
-  const user = await User.findById(removedPlan.user);
 
-  // we also need to remove the plan from the user document
-  user.plans = user.plans.filter(planId => planId.toString() !== removedPlan.id);
-  await user.save();
+  if (removedPlan) {
+    const user = await User.findById(removedPlan.user);
 
-  res.status(204).end();
+    // we also need to remove the plan from the user document
+    user.plans = user.plans.filter(planId => planId.toString() !== removedPlan.id);
+    await user.save();
+
+    res.status(204).end();
+  }
+
+  res.status(404).end();
 });
 
 plansRouter.post("/", async (req, res) => {
@@ -68,8 +73,18 @@ plansRouter.post("/", async (req, res) => {
 
   if (!req.body.userId) {
     res.status(400).end();
+    throw Error("user required");
   }
 
+  if (!req.body.lunch) {
+    res.status(400).end();
+    throw Error("lunch meals required");
+  }
+
+  if (!req.body.dinner) {
+    res.status(400).end();
+    throw Error("dinner meals required");
+  }
   const user = await User.findById(body.userId);
 
   const lunchIds = [];
