@@ -25,17 +25,18 @@ mealsRouter.get("/:id", async (req, res) => {
 
 mealsRouter.delete("/:id", async (req, res) => {
   const foundMeal = await Meal.findByIdAndRemove(req.params.id);
-  const user = await User.findById(foundMeal.user);
 
-  // we also need to remove the meal from the user document
-  user.meals = user.meals.filter(mealId => mealId.toString() !== foundMeal.id);
-  await user.save();
+  if (foundMeal) {
+    const user = await User.findById(foundMeal.user);
 
-  if (!foundMeal) {
-    res.status(404).end();
+    // we also need to remove the meal from the user document
+    user.meals = user.meals.filter(mealId => mealId.toString() !== foundMeal.id);
+    await user.save();
+
+    res.status(204).end();
   }
 
-  res.status(204).end();
+  res.status(404).end();
 });
 
 mealsRouter.post("/", async (req, res) => {
