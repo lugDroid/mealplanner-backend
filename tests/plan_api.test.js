@@ -243,6 +243,69 @@ describe("deletion of a plan", () => {
   });
 });
 
+describe("modifying a plan", () => {
+  test("succeeds with status code 200 if id is valid", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const planToModify = plansAtStart[0];
+
+    const modifiedPlan = {
+      name: "Modified plan",
+      lunch: planToModify.lunch.map(m => m.name),
+      dinner: planToModify.dinner.map(m => m.name),
+      userId: planToModify.user.id
+    };
+
+    await api
+      .put(`/api/plans/${planToModify.id}`)
+      .send(modifiedPlan)
+      .expect(200);
+
+    const plansAtEnd = await helper.plansInDb();
+    const names = plansAtEnd.map(p => p.name);
+
+    expect(plansAtEnd).toHaveLength(plansAtStart.length);
+    expect(names).toContain(modifiedPlan.name);
+  });
+
+  test("fails with status code 404 if plan does not exist", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const planToModify = plansAtStart[0];
+    const validNonExistingId = await helper.nonExistingId();
+
+
+    const modifiedPlan = {
+      name: "Modified plan",
+      lunch: planToModify.lunch.map(m => m.name),
+      dinner: planToModify.dinner.map(m => m.name),
+      userId: planToModify.user.id
+    };
+
+    await api
+      .put(`/api/plans/${validNonExistingId}`)
+      .send(modifiedPlan)
+      .expect(404);
+  });
+
+  test("fails with status code 400 if id is invalid", async () => {
+    const plansAtStart = await helper.plansInDb();
+    const planToModify = plansAtStart[0];
+    const invalidId = "nonValidId";
+
+
+    const modifiedPlan = {
+      name: "Modified plan",
+      lunch: planToModify.lunch.map(m => m.name),
+      dinner: planToModify.dinner.map(m => m.name),
+      userId: planToModify.user.id
+    };
+
+    await api
+      .put(`/api/plans/${invalidId}`)
+      .send(modifiedPlan)
+      .expect(400);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
