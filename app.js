@@ -3,6 +3,7 @@ const express = require("express");
 require("express-async-errors");
 const app = express();
 const cors = require("cors");
+const loginRouter = require("./controllers/login");
 const mealsRouter = require("./controllers/meals");
 const groupsRouter = require("./controllers/groups");
 const plansRouter = require("./controllers/plans");
@@ -29,6 +30,7 @@ app.use(express.static("build"));
 app.use(express.json());
 app.use(middleware.requestLogger);
 
+app.use("/api/login", loginRouter);
 app.use("/api/meals", mealsRouter);
 app.use("/api/groups", groupsRouter);
 app.use("/api/plans", plansRouter);
