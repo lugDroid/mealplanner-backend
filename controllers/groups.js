@@ -4,11 +4,19 @@ const User = require("../models/users");
 const ObjectId = require("mongoose").Types.ObjectId;
 
 groupsRouter.get("/", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const groups = await Group.find({}).populate("user", { username: 1, name: 1 });
   res.json(groups);
 });
 
 groupsRouter.get("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   if (!ObjectId.isValid(req.params.id)) {
     res.status(400).end();
   }
@@ -23,11 +31,15 @@ groupsRouter.get("/:id", async (req, res) => {
 });
 
 groupsRouter.delete("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
+  const user = await User.findById(req.decodedToken.id);
+
   const removedGroup = await Group.findByIdAndRemove(req.params.id);
 
   if (removedGroup) {
-    const user = await User.findById(removedGroup.user);
-
     // we also need to remove the group from the user document
     user.groups = user.groups.filter(groupId => groupId.toString() !== removedGroup.id);
     await user.save();
@@ -64,10 +76,16 @@ groupsRouter.post("/", async (req, res) => {
 groupsRouter.put("/:id", async (req, res) => {
   const body = req.body;
 
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
+  const user = await User.findById(req.decodedToken.id);
+
   const modifiedGroup = {
     name: body.name,
     weeklyRations: body.weeklyRations,
-    user: body.userId
+    user: user._id
   };
 
   const updatedGroup = await Group.findByIdAndUpdate(req.params.id, modifiedGroup, {
