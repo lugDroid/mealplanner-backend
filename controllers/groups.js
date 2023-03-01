@@ -2,17 +2,6 @@ const groupsRouter = require("express").Router();
 const Group = require("../models/group");
 const User = require("../models/users");
 const ObjectId = require("mongoose").Types.ObjectId;
-const jwt = require("jsonwebtoken");
-
-const getTokenFrom = (req) => {
-  const authorization = req.get("authorization");
-
-  if (authorization && authorization.startsWith("Bearer ")) {
-    return authorization.replace("Bearer ", "");
-  }
-
-  return null;
-};
 
 groupsRouter.get("/", async (req, res) => {
   const groups = await Group.find({}).populate("user", { username: 1, name: 1 });
@@ -52,12 +41,11 @@ groupsRouter.delete("/:id", async (req, res) => {
 groupsRouter.post("/", async (req, res) => {
   const body = req.body;
 
-  const decodedToken = jwt.verify(getTokenFrom(req), process.env.SECRET);
-  if (!decodedToken.id) {
+  if (!req.decodedToken) {
     return res.status(401).json({ error: "invalid token" });
   }
 
-  const user = await User.findById(decodedToken.id);
+  const user = await User.findById(req.decodedToken.id);
 
   const group = new Group({
     name: body.name,
