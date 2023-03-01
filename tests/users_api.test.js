@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const supertest = require("supertest");
-const helper = require("./users_test_helpers");
+const helper = require("./test_helpers");
 const app = require("../app");
 const User = require("../models/users");
 
