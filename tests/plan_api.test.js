@@ -9,6 +9,7 @@ const Plan = require("../models/plan");
 
 const api = supertest(app);
 let initialPlans;
+let token;
 
 beforeAll(async () => {
   await User.deleteMany({});
@@ -25,6 +26,8 @@ beforeAll(async () => {
   await Meal.insertMany(mealsToAdd);
 
   initialPlans = await helper.generatePlans(2);
+
+  token = await helper.getUserToken();
 });
 
 beforeEach(async () => {
@@ -36,18 +39,23 @@ describe("when there is initially some plan saved", () => {
   test("plans are returned as json", async () => {
     await api
       .get("/api/plans")
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
   });
 
   test("all plans are returned", async () => {
-    const res = await api.get("/api/plans");
+    const res = await api
+      .get("/api/plans")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.body).toHaveLength(initialPlans.length);
   });
 
   test("a specific plan is within the returned plans", async () => {
-    const res = await api.get("/api/plans");
+    const res = await api
+      .get("/api/plans")
+      .set("Authorization", `Bearer ${token}`);
 
     const names = res.body.map(plan => plan.name);
     expect(names).toContain(initialPlans[0].name);
@@ -61,6 +69,7 @@ describe("viewing a specific plan", () => {
 
     const resultPlan = await api
       .get(`/api/plans/${planToView.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
@@ -73,6 +82,7 @@ describe("viewing a specific plan", () => {
 
     await api
       .get(`/api/plans/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(404);
   });
 
@@ -81,6 +91,7 @@ describe("viewing a specific plan", () => {
 
     await api
       .get(`/api/plans/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(400);
   });
 });
@@ -94,11 +105,11 @@ describe("addition of a new plan", () => {
       name: "New plan",
       lunch: initialPlan.lunch.map(m => m.name),
       dinner: initialPlan.dinner.map(m => m.name),
-      userId: initialPlan.user.id
     };
 
     await api
       .post("/api/plans")
+      .set("Authorization", `Bearer ${token}`)
       .send(newPlan)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -116,12 +127,12 @@ describe("addition of a new plan", () => {
 
     const modifiedPlan = {
       lunch: initialPlan.lunch.map(m => m.name),
-      dinner: initialPlan.dinner.map(m => m.name),
-      userId: initialPlan.user.id
+      dinner: initialPlan.dinner.map(m => m.name)
     };
 
     await api
       .post("/api/plans")
+      .set("Authorization", `Bearer ${token}`)
       .send(modifiedPlan)
       .expect(400);
 
@@ -132,7 +143,7 @@ describe("addition of a new plan", () => {
     expect(names).not.toContain(modifiedPlan.name);
   });
 
-  test("fails with status code 400 if user is not included", async () => {
+  test("fails with status code 401 if user authorizations is not included", async () => {
     const plansAtStart = await helper.plansInDb();
     const initialPlan = plansAtStart[0];
 
@@ -145,7 +156,7 @@ describe("addition of a new plan", () => {
     await api
       .post("/api/plans")
       .send(modifiedPlan)
-      .expect(400);
+      .expect(401);
 
     const plansAtEnd = await helper.plansInDb();
     const names = plansAtEnd.map(p => p.name);
@@ -160,12 +171,12 @@ describe("addition of a new plan", () => {
 
     const modifiedPlan = {
       name: "Modified plan",
-      dinner: initialPlan.dinner.map(m => m.name),
-      userId: initialPlan.user.id
+      dinner: initialPlan.dinner.map(m => m.name)
     };
 
     await api
       .post("/api/plans")
+      .set("Authorization", `Bearer ${token}`)
       .send(modifiedPlan)
       .expect(400);
 
@@ -182,12 +193,12 @@ describe("addition of a new plan", () => {
 
     const modifiedPlan = {
       name: "Modified plan",
-      lunch: initialPlan.lunch.map(m => m.name),
-      userId: initialPlan.user.id
+      lunch: initialPlan.lunch.map(m => m.name)
     };
 
     await api
       .post("/api/plans")
+      .set("Authorization", `Bearer ${token}`)
       .send(modifiedPlan)
       .expect(400);
 
@@ -206,6 +217,7 @@ describe("deletion of a plan", () => {
 
     await api
       .delete(`/api/plans/${planToDelete.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(204);
 
     const plansAtEnd = await helper.plansInDb();
@@ -222,6 +234,7 @@ describe("deletion of a plan", () => {
 
     await api
       .delete(`/api/plans/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(404);
 
     const plansAtEnd = await helper.plansInDb();
@@ -235,6 +248,7 @@ describe("deletion of a plan", () => {
 
     await api
       .delete(`/api/plans/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(400);
 
     const plansAtEnd = await helper.plansInDb();
@@ -251,12 +265,12 @@ describe("modifying a plan", () => {
     const modifiedPlan = {
       name: "Modified plan",
       lunch: planToModify.lunch.map(m => m.name),
-      dinner: planToModify.dinner.map(m => m.name),
-      userId: planToModify.user.id
+      dinner: planToModify.dinner.map(m => m.name)
     };
 
     await api
       .put(`/api/plans/${planToModify.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(modifiedPlan)
       .expect(200);
 
@@ -276,12 +290,12 @@ describe("modifying a plan", () => {
     const modifiedPlan = {
       name: "Modified plan",
       lunch: planToModify.lunch.map(m => m.name),
-      dinner: planToModify.dinner.map(m => m.name),
-      userId: planToModify.user.id
+      dinner: planToModify.dinner.map(m => m.name)
     };
 
     await api
       .put(`/api/plans/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(modifiedPlan)
       .expect(404);
   });
@@ -295,12 +309,12 @@ describe("modifying a plan", () => {
     const modifiedPlan = {
       name: "Modified plan",
       lunch: planToModify.lunch.map(m => m.name),
-      dinner: planToModify.dinner.map(m => m.name),
-      userId: planToModify.user.id
+      dinner: planToModify.dinner.map(m => m.name)
     };
 
     await api
       .put(`/api/plans/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(modifiedPlan)
       .expect(400);
   });
