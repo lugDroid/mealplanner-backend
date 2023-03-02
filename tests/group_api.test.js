@@ -6,15 +6,18 @@ const Group = require("../models/group");
 const User = require("../models/users");
 
 const api = supertest(app);
+let initialGroups;
 
-beforeEach(async () => {
+beforeAll(async () => {
   await User.deleteMany({});
   await User.insertMany(helper.initialUsers);
 
+  initialGroups = await helper.generateGroups(5);
+});
+
+beforeEach(async () => {
   await Group.deleteMany({});
-  const savedUsers = await helper.usersInDb();
-  const groupsToAdd = await helper.groupsWithUsersInfo(savedUsers);
-  await Group.insertMany(groupsToAdd);
+  await Group.insertMany(initialGroups);
 });
 
 describe("when there is initially some groups saved", () => {

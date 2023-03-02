@@ -103,17 +103,21 @@ const plansInDb = async () => {
   return plans.map(plan => plan.toJSON());
 };
 
-const groupsWithUsersInfo = async (savedUsers) => {
-  const groupsWithUsers = [];
+const generateGroups = async (numberOfGroups) => {
+  const groups = [];
+  const users = await usersInDb();
 
-  for (const group of initialGroups) {
-    // assign random user
-    const user = savedUsers[0];
-    const groupWithUser = { ...group, user: user.id };
-    groupsWithUsers.push(groupWithUser);
+  for (let i = 0; i < numberOfGroups; i++) {
+    const group = {
+      name: "Group " + i,
+      weeklyRations: Math.floor(Math.random() * 4),
+      user: users[0].id
+    };
+
+    groups.push(group);
   }
 
-  return groupsWithUsers;
+  return groups;
 };
 
 const mealsWithGroupInfo = async (savedGroups) => {
@@ -171,7 +175,7 @@ module.exports = {
   groupsInDb,
   mealsInDb,
   plansInDb,
-  groupsWithUsersInfo,
+  generateGroups,
   mealsWithGroupInfo,
   generatePlans,
   getUserToken
