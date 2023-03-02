@@ -5,6 +5,10 @@ const User = require("../models/users");
 const ObjectId = require("mongoose").Types.ObjectId;
 
 plansRouter.get("/", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const plans = await Plan.find({})
     .populate({
       path: "lunch",
@@ -25,6 +29,10 @@ plansRouter.get("/", async (req, res) => {
 });
 
 plansRouter.get("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   if (!ObjectId.isValid(req.params.id)) {
     res.status(400).end();
   }
@@ -53,6 +61,10 @@ plansRouter.get("/:id", async (req, res) => {
 });
 
 plansRouter.delete("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const removedPlan = await Plan.findByIdAndRemove(req.params.id);
 
   if (removedPlan) {
@@ -69,12 +81,11 @@ plansRouter.delete("/:id", async (req, res) => {
 });
 
 plansRouter.post("/", async (req, res) => {
-  const body = req.body;
-
-  if (!req.body.userId) {
-    res.status(400).end();
-    throw Error("user required");
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
   }
+
+  const body = req.body;
 
   if (!req.body.lunch) {
     res.status(400).end();
@@ -85,7 +96,7 @@ plansRouter.post("/", async (req, res) => {
     res.status(400).end();
     throw Error("dinner meals required");
   }
-  const user = await User.findById(body.userId);
+  const user = await User.findById(req.decodedToken.id);
 
   const lunchIds = [];
   for (const meal of body.lunch) {
@@ -103,7 +114,7 @@ plansRouter.post("/", async (req, res) => {
     name: body.name,
     lunch: lunchIds,
     dinner: dinnerIds,
-    user: body.userId
+    user: user._id
   });
 
   const savedPlan = await newPlan.save();
@@ -120,6 +131,10 @@ plansRouter.post("/", async (req, res) => {
 });
 
 plansRouter.put("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const body = req.body;
 
   const lunchIds = [];
@@ -138,7 +153,7 @@ plansRouter.put("/:id", async (req, res) => {
     name: body.name,
     lunch: lunchIds,
     dinner: dinnerIds,
-    user: body.userId
+    user: req.decodedToken.id
   };
 
   const updatedPlan = await Plan.findByIdAndUpdate(req.params.id, planToUpdate, {
