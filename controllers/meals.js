@@ -4,6 +4,10 @@ const Group = require("../models/group");
 const User = require("../models/users");
 
 mealsRouter.get("/", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const meals = await Meal.find({})
     .populate("group", { name: 1, weeklyRations: 1 })
     .populate("user", { username: 1, name: 1 });
@@ -12,6 +16,10 @@ mealsRouter.get("/", async (req, res) => {
 });
 
 mealsRouter.get("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const meal = await Meal.findById(req.params.id)
     .populate("group", { name: 1, weeklyRations: 1 })
     .populate("user", { username: 1, name: 1 });
@@ -24,6 +32,10 @@ mealsRouter.get("/:id", async (req, res) => {
 });
 
 mealsRouter.delete("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const foundMeal = await Meal.findByIdAndRemove(req.params.id);
 
   if (foundMeal) {
@@ -40,6 +52,10 @@ mealsRouter.delete("/:id", async (req, res) => {
 });
 
 mealsRouter.post("/", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const body = req.body;
 
   if (!body.name) {
@@ -52,11 +68,6 @@ mealsRouter.post("/", async (req, res) => {
     throw Error("group required");
   }
 
-  if (!body.userId) {
-    res.status(400).end();
-    throw Error("user required");
-  }
-
   if (!body.timeOfDay) {
     res.status(400).end();
     throw Error("time of day required");
@@ -66,7 +77,8 @@ mealsRouter.post("/", async (req, res) => {
     res.status(400).end();
     throw Error("number of days required");
   }
-  const user = await User.findById(body.userId);
+
+  const user = await User.findById(req.decodedToken.id);
   const group = await Group.findOne({ name: body.group });
 
   if (!group) {
@@ -98,6 +110,10 @@ mealsRouter.post("/", async (req, res) => {
 });
 
 mealsRouter.put("/:id", async (req, res) => {
+  if (!req.decodedToken) {
+    return res.status(401).json({ error: "invalid token" });
+  }
+
   const body = req.body;
 
   const group = await Group.findOne({ name: body.group });
