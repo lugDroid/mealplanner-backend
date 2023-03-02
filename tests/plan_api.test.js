@@ -16,14 +16,10 @@ beforeAll(async () => {
   await User.insertMany(helper.initialUsers);
 
   await Group.deleteMany({});
-  const savedUsers = await helper.usersInDb();
-  const groupsToAdd = await helper.groupsWithUsersInfo(savedUsers);
-  await Group.insertMany(groupsToAdd);
+  await Group.insertMany(await helper.generateGroups(5));
 
   await Meal.deleteMany({});
-  const savedGroups = await helper.groupsInDb();
-  const mealsToAdd = await helper.mealsWithGroupInfo(savedGroups);
-  await Meal.insertMany(mealsToAdd);
+  await Meal.insertMany(await helper.generateMeals(10));
 
   initialPlans = await helper.generatePlans(2);
 

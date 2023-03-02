@@ -12,32 +12,6 @@ const initialUsers = [
   }
 ];
 
-const initialGroups = [
-  {
-    name: "Group A",
-    weeklyRations: 6,
-  },
-  {
-    name: "Group B",
-    weeklyRations: 4,
-  },
-];
-
-const initialMeals = [
-  {
-    name: "Meal A",
-    group: "Group A",
-    timeOfDay: "Lunch",
-    numberOfDays: 2,
-  },
-  {
-    name: "Meal B",
-    group: "Group B",
-    timeOfDay: "Dinner",
-    numberOfDays: 1,
-  },
-];
-
 const nonExistingId = async () => {
   const user = await usersInDb();
   const group = new Group({
@@ -120,17 +94,24 @@ const generateGroups = async (numberOfGroups) => {
   return groups;
 };
 
-const mealsWithGroupInfo = async (savedGroups) => {
-  const mealsWithGroups = [];
+const generateMeals = async (numberOfMeals) => {
+  const meals = [];
+  const times = ["Lunch", "Dinner", "Any"];
+  const users = await usersInDb();
+  const groups = await groupsInDb();
 
-  for (const meal of initialMeals) {
-    const group = savedGroups.find(g => g.name == meal.group);
+  for (let i = 0; i < numberOfMeals; i++) {
+    const meal = {
+      name: "Meal " + i,
+      group: groups[Math.floor(Math.random() * groups.length)].id,
+      timeOfDay: times[Math.floor(Math.random() * times.length)],
+      numberOfDays: Math.floor(Math.random() * 2),
+      user: users[Math.floor(Math.random() * users.length)].id
+    };
 
-    const mealWithGroup = { ...meal, group: group.id.toString(), user: group.user.id.toString() };
-    mealsWithGroups.push(mealWithGroup);
+    meals.push(meal);
   }
-
-  return mealsWithGroups;
+  return meals;
 };
 
 const generatePlans = async (numberOfPlans) => {
@@ -168,15 +149,13 @@ const getUserToken = async () => {
 
 module.exports = {
   initialUsers,
-  initialGroups,
-  initialMeals,
   nonExistingId,
   usersInDb,
   groupsInDb,
   mealsInDb,
   plansInDb,
   generateGroups,
-  mealsWithGroupInfo,
+  generateMeals,
   generatePlans,
   getUserToken
 };

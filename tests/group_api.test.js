@@ -7,12 +7,15 @@ const User = require("../models/users");
 
 const api = supertest(app);
 let initialGroups;
+let token;
 
 beforeAll(async () => {
   await User.deleteMany({});
   await User.insertMany(helper.initialUsers);
 
   initialGroups = await helper.generateGroups(5);
+
+  token = await helper.getUserToken();
 });
 
 beforeEach(async () => {
@@ -22,8 +25,6 @@ beforeEach(async () => {
 
 describe("when there is initially some groups saved", () => {
   test("groups are returned as json", async () => {
-    const token = await helper.getUserToken();
-
     await api
       .get("/api/groups")
       .set("Authorization", `Bearer ${token}`)
@@ -32,28 +33,25 @@ describe("when there is initially some groups saved", () => {
   });
 
   test("all groups are returned", async () => {
-    const token = await helper.getUserToken();
     const res = await api
       .get("/api/groups")
       .set("Authorization", `Bearer ${token}`);
 
-    expect(res.body).toHaveLength(helper.initialGroups.length);
+    expect(res.body).toHaveLength(initialGroups.length);
   });
 
   test("a specific group is withing the returned groups", async () => {
-    const token = await helper.getUserToken();
     const res = await api
       .get("/api/groups")
       .set("Authorization", `Bearer ${token}`);
 
     const names = res.body.map(r => r.name);
-    expect(names).toContain(helper.initialGroups[0].name);
+    expect(names).toContain(initialGroups[0].name);
   });
 });
 
 describe("viewing a specific group", () => {
   test("succeeds with a valid id", async () => {
-    const token = await helper.getUserToken();
     const groupsAtStart = await await helper.groupsInDb();
     const groupToView = groupsAtStart[0];
 
@@ -67,7 +65,6 @@ describe("viewing a specific group", () => {
   });
 
   test("fails with statuscode 404 if group does not exist", async () => {
-    const token = await helper.getUserToken();
     const validNonExistingId = await helper.nonExistingId();
 
     await api
@@ -77,7 +74,6 @@ describe("viewing a specific group", () => {
   });
 
   test("fails with statuscode 400 if id is invalid", async () => {
-    const token = await helper.getUserToken();
     const invalidId = "nonValidId";
 
     await api
@@ -89,8 +85,6 @@ describe("viewing a specific group", () => {
 
 describe("addition of a new group", () => {
   test("succeeds with valid data", async () => {
-    const token = await helper.getUserToken();
-
     const newGroup = {
       name: "New group",
       weeklyRations: 1,
@@ -106,13 +100,11 @@ describe("addition of a new group", () => {
     const groupsAtEnd = await helper.groupsInDb();
     const names = groupsAtEnd.map(g => g.name);
 
-    expect(groupsAtEnd).toHaveLength(helper.initialGroups.length + 1);
+    expect(groupsAtEnd).toHaveLength(initialGroups.length + 1);
     expect(names).toContain("New group");
   });
 
   test("fails with status code 400 if name is missing", async () => {
-    const token = await helper.getUserToken();
-
     const newGroup = {
       weeklyRations: 1,
     };
@@ -125,7 +117,7 @@ describe("addition of a new group", () => {
 
     const groupsAtEnd = await helper.groupsInDb();
 
-    expect(groupsAtEnd).toHaveLength(helper.initialGroups.length);
+    expect(groupsAtEnd).toHaveLength(initialGroups.length);
   });
 
   test("fails with status code 401 if user authorization is missing", async () => {
@@ -142,13 +134,12 @@ describe("addition of a new group", () => {
 
     const groupsAtEnd = await helper.groupsInDb();
 
-    expect(groupsAtEnd).toHaveLength(helper.initialGroups.length);
+    expect(groupsAtEnd).toHaveLength(initialGroups.length);
   });
 });
 
 describe("deletion of a group", () => {
   test("succeeds with status code 204 if id is valid", async () => {
-    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToDelete = groupsAtStart[0];
 
@@ -159,14 +150,13 @@ describe("deletion of a group", () => {
 
     const groupsAtEnd = await helper.groupsInDb();
 
-    expect(groupsAtEnd).toHaveLength(helper.initialGroups.length - 1);
+    expect(groupsAtEnd).toHaveLength(initialGroups.length - 1);
 
     const names = groupsAtEnd.map(g => g.name);
     expect(names).not.toContain(groupToDelete.name);
   });
 
   test("fails with status code 404 if group does not exist", async () => {
-    const token = await helper.getUserToken();
     const validNonExistingId = await helper.nonExistingId();
 
     await api
@@ -176,7 +166,6 @@ describe("deletion of a group", () => {
   });
 
   test("fails with status code 400 if id is invalid", async () => {
-    const token = await helper.getUserToken();
     const invalidId = "nonValidId";
 
     await api
@@ -188,7 +177,6 @@ describe("deletion of a group", () => {
 
 describe("modifying a group", () => {
   test("succeeds with statuscode 204 if id is valid", async () => {
-    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToModify = groupsAtStart[0];
 
@@ -207,7 +195,6 @@ describe("modifying a group", () => {
   });
 
   test("fails with status code 404 if group does not exist", async () => {
-    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToModify = groupsAtStart[0];
     const validNonExistingId = await helper.nonExistingId();
@@ -225,7 +212,6 @@ describe("modifying a group", () => {
   });
 
   test("fails with status code 400 if id is invalid", async () => {
-    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToModify = groupsAtStart[0];
     const invalidId = "nonValidId";
