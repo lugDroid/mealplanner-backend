@@ -25,20 +25,31 @@ beforeEach(async () => {
 
 describe("when there is initially some meals saved", () => {
   test("meals are returned as json", async () => {
+    const token = await helper.getUserToken();
+
     await api
       .get("/api/meals")
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
   });
 
   test("all meals are returned", async () => {
-    const res = await api.get("/api/meals");
+    const token = await helper.getUserToken();
+
+    const res = await api
+      .get("/api/meals")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.body).toHaveLength(helper.initialMeals.length);
   });
 
   test("a specific meal is within the returned meals", async () => {
-    const res = await api.get("/api/meals");
+    const token = await helper.getUserToken();
+
+    const res = await api
+      .get("/api/meals")
+      .set("Authorization", `Bearer ${token}`);
 
     const names = res.body.map((r) => r.name);
     expect(names).toContain(helper.initialMeals[0].name);
@@ -47,11 +58,13 @@ describe("when there is initially some meals saved", () => {
 
 describe("viewing a specific meal", () => {
   test("succeeds with a valid id", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const mealToView = mealsAtStart[0];
 
     const resultMeal = await api
       .get(`/api/meals/${mealToView.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
@@ -61,35 +74,40 @@ describe("viewing a specific meal", () => {
   });
 
   test("fails with status code 404 if meal does not exist", async () => {
+    const token = await helper.getUserToken();
     const validNonExistingId = await helper.nonExistingId();
 
     await api
       .get(`/api/meals/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(404);
   });
 
   test("fails with status code 400 if id is invalid", async () => {
+    const token = await helper.getUserToken();
     const invalidId = "nonValidId";
 
     await api
       .get(`/api/meals/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(400);
   });
 });
 
 describe("addition of a new meal", () => {
   test("succeeds with valid data", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
+
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
-      userId: users[0].id,
       timeOfDay: "Lunch",
       numberOfDays: "1",
     };
 
     await api
       .post("/api/meals")
+      .set("Authorization", `Bearer ${token}`)
       .send(newMeal)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -102,17 +120,17 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if name is not included", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
 
     const newMeal = {
       group: helper.initialGroups[0].name,
-      userId: users[0].id,
       timeOfDay: "Lunch",
       numberOfDays: "1",
     };
 
     await api
       .post("/api/meals")
+      .set("Authorization", `Bearer ${token}`)
       .send(newMeal)
       .expect(400);
 
@@ -121,16 +139,17 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if group is not included", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
+
     const newMeal = {
       name: "New meal",
-      userId: users[0].id,
       timeOfDay: "Lunch",
       numberOfDays: "1",
     };
 
     await api
       .post("/api/meals")
+      .set("Authorization", `Bearer ${token}`)
       .send(newMeal)
       .expect(400);
 
@@ -138,7 +157,7 @@ describe("addition of a new meal", () => {
     expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
   });
 
-  test("fails with status code 400 if user id is not included", async () => {
+  test("fails with status code 401 if user authorization is not included", async () => {
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
@@ -149,24 +168,24 @@ describe("addition of a new meal", () => {
     await api
       .post("/api/meals")
       .send(newMeal)
-      .expect(400);
+      .expect(401);
 
     const mealsAtEnd = await helper.mealsInDb();
     expect(mealsAtEnd).toHaveLength(helper.initialMeals.length);
   });
 
   test("fails with status code 400 if time of day is not included", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
 
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
-      userId: users[0].id,
       numberOfDays: "1",
     };
 
     await api
       .post("/api/meals")
+      .set("Authorization", `Bearer ${token}`)
       .send(newMeal)
       .expect(400);
 
@@ -175,17 +194,17 @@ describe("addition of a new meal", () => {
   });
 
   test("fails with status code 400 if number of days is not included", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
 
     const newMeal = {
       name: "New meal",
       group: helper.initialGroups[0].name,
-      userId: users[0].id,
       timeOfDay: "Lunch",
     };
 
     await api
       .post("/api/meals")
+      .set("Authorization", `Bearer ${token}`)
       .send(newMeal)
       .expect(400);
 
@@ -196,11 +215,13 @@ describe("addition of a new meal", () => {
 
 describe("deletion of a meal", () => {
   test("succeeds with status code 204 if id is valid", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const mealToDelete = mealsAtStart[0];
 
     await api
       .delete(`/api/meals/${mealToDelete.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(204);
 
     const mealsAtEnd = await helper.mealsInDb();
@@ -212,11 +233,13 @@ describe("deletion of a meal", () => {
   });
 
   test("fails with status code 404 if meal does not exist", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const validNonExistingId = await helper.nonExistingId();
 
     await api
       .delete(`/api/meals/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(404);
 
     const mealsAtEnd = await helper.mealsInDb();
@@ -224,11 +247,13 @@ describe("deletion of a meal", () => {
   });
 
   test("fails with status code 400 if id is invalid", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const invalidId = "nonValidId";
 
     await api
       .get(`/api/meals/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(400);
 
     const mealsAtEnd = await helper.mealsInDb();
@@ -238,6 +263,7 @@ describe("deletion of a meal", () => {
 
 describe("modifying a meal", () => {
   test("succeeds with status code 204 if id is valid", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const mealToModify = mealsAtStart[0];
 
@@ -245,6 +271,7 @@ describe("modifying a meal", () => {
 
     await api
       .put(`/api/meals/${mealToModify.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(mealToModify)
       .expect(200);
 
@@ -255,6 +282,7 @@ describe("modifying a meal", () => {
   });
 
   test("fails with status code 404 if meal does not exists", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const validNonExistingId = await helper.nonExistingId();
     const mealToModify = mealsAtStart[0];
@@ -263,11 +291,13 @@ describe("modifying a meal", () => {
 
     await api
       .put(`/api/meals/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(mealToModify)
       .expect(404);
   });
 
   test("fails with status code 400 if id is invalid", async () => {
+    const token = await helper.getUserToken();
     const mealsAtStart = await helper.mealsInDb();
     const invalidId = "nonValidId";
     const mealToModify = mealsAtStart[0];
@@ -276,6 +306,7 @@ describe("modifying a meal", () => {
 
     await api
       .put(`/api/meals/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(mealToModify)
       .expect(400);
   });
