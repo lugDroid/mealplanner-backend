@@ -90,7 +90,6 @@ mealsRouter.post("/", async (req, res) => {
   const newMeal = new Meal({
     name: body.name,
     group: body.group,
-    userId: body.userId,
     timeOfDay: body.timeOfDay,
     numberOfDays: body.numberOfDays,
     user: user._id
@@ -124,7 +123,7 @@ mealsRouter.put("/:id", async (req, res) => {
     group: body.group,
     timeOfDay: body.timeOfDay,
     numberOfDays: body.numberOfDays,
-    user: body.userId
+    user: req.decodedToken.id
   };
 
   const updatedMeal = await Meal.findByIdAndUpdate(req.params.id, modifiedMeal, {
