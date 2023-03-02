@@ -2,6 +2,7 @@ const Group = require("../models/group");
 const Meal = require("../models/meal");
 const plan = require("../models/plan");
 const User = require("../models/users");
+const jwt = require("jsonwebtoken");
 
 const initialUsers = [
   {
@@ -155,7 +156,11 @@ const generatePlans = async (numberOfPlans) => {
   return plans;
 };
 
-
+const getUserToken = async () => {
+  const users = await usersInDb();
+  const user = users[0];
+  return jwt.sign(user, process.env.SECRET);
+};
 
 module.exports = {
   initialUsers,
@@ -168,5 +173,6 @@ module.exports = {
   plansInDb,
   groupsWithUsersInfo,
   mealsWithGroupInfo,
-  generatePlans
+  generatePlans,
+  getUserToken
 };

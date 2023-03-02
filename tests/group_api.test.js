@@ -19,20 +19,29 @@ beforeEach(async () => {
 
 describe("when there is initially some groups saved", () => {
   test("groups are returned as json", async () => {
+    const token = await helper.getUserToken();
+
     await api
       .get("/api/groups")
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
   });
 
   test("all groups are returned", async () => {
-    const res = await api.get("/api/groups");
+    const token = await helper.getUserToken();
+    const res = await api
+      .get("/api/groups")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.body).toHaveLength(helper.initialGroups.length);
   });
 
   test("a specific group is withing the returned groups", async () => {
-    const res = await api.get("/api/groups");
+    const token = await helper.getUserToken();
+    const res = await api
+      .get("/api/groups")
+      .set("Authorization", `Bearer ${token}`);
 
     const names = res.body.map(r => r.name);
     expect(names).toContain(helper.initialGroups[0].name);
@@ -41,11 +50,13 @@ describe("when there is initially some groups saved", () => {
 
 describe("viewing a specific group", () => {
   test("succeeds with a valid id", async () => {
+    const token = await helper.getUserToken();
     const groupsAtStart = await await helper.groupsInDb();
     const groupToView = groupsAtStart[0];
 
     const resultGroup = await api
       .get(`/api/groups/${groupToView.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
@@ -53,34 +64,38 @@ describe("viewing a specific group", () => {
   });
 
   test("fails with statuscode 404 if group does not exist", async () => {
+    const token = await helper.getUserToken();
     const validNonExistingId = await helper.nonExistingId();
 
     await api
       .get(`/api/groups/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(404);
   });
 
   test("fails with statuscode 400 if id is invalid", async () => {
+    const token = await helper.getUserToken();
     const invalidId = "nonValidId";
 
     await api
       .get(`/api/groups/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(400);
   });
 });
 
 describe("addition of a new group", () => {
   test("succeeds with valid data", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
 
     const newGroup = {
       name: "New group",
       weeklyRations: 1,
-      userId: users[0].id
     };
 
     await api
       .post("/api/groups")
+      .set("Authorization", `Bearer ${token}`)
       .send(newGroup)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -93,15 +108,15 @@ describe("addition of a new group", () => {
   });
 
   test("fails with status code 400 if name is missing", async () => {
-    const users = await helper.usersInDb();
+    const token = await helper.getUserToken();
 
     const newGroup = {
       weeklyRations: 1,
-      userId: users[0].id
     };
 
     await api
       .post("/api/groups")
+      .set("Authorization", `Bearer ${token}`)
       .send(newGroup)
       .expect(400);
 
@@ -110,7 +125,7 @@ describe("addition of a new group", () => {
     expect(groupsAtEnd).toHaveLength(helper.initialGroups.length);
   });
 
-  test("fails with status code 400 if user is missing", async () => {
+  test("fails with status code 401 if user authorization is missing", async () => {
     const newGroup = {
       name: "Test Group",
       weeklyRations: 1
@@ -118,8 +133,9 @@ describe("addition of a new group", () => {
 
     await api
       .post("/api/groups")
+      //.set("Authorization", `Bearer ${token}`)
       .send(newGroup)
-      .expect(400);
+      .expect(401);
 
     const groupsAtEnd = await helper.groupsInDb();
 
@@ -129,11 +145,13 @@ describe("addition of a new group", () => {
 
 describe("deletion of a group", () => {
   test("succeeds with status code 204 if id is valid", async () => {
+    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToDelete = groupsAtStart[0];
 
     await api
       .delete(`/api/groups/${groupToDelete.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(204);
 
     const groupsAtEnd = await helper.groupsInDb();
@@ -145,24 +163,29 @@ describe("deletion of a group", () => {
   });
 
   test("fails with status code 404 if group does not exist", async () => {
+    const token = await helper.getUserToken();
     const validNonExistingId = await helper.nonExistingId();
 
     await api
       .delete(`/api/groups/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(404);
   });
 
   test("fails with status code 400 if id is invalid", async () => {
+    const token = await helper.getUserToken();
     const invalidId = "nonValidId";
 
     await api
       .delete(`/api/groups/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(400);
   });
 });
 
 describe("modifying a group", () => {
   test("succeeds with statuscode 204 if id is valid", async () => {
+    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToModify = groupsAtStart[0];
 
@@ -170,6 +193,7 @@ describe("modifying a group", () => {
 
     await api
       .put(`/api/groups/${groupToModify.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(groupToModify)
       .expect(200);
 
@@ -180,6 +204,7 @@ describe("modifying a group", () => {
   });
 
   test("fails with status code 404 if group does not exist", async () => {
+    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToModify = groupsAtStart[0];
     const validNonExistingId = await helper.nonExistingId();
@@ -188,6 +213,7 @@ describe("modifying a group", () => {
 
     await api
       .put(`/api/groups/${validNonExistingId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(groupToModify)
       .expect(404);
 
@@ -196,6 +222,7 @@ describe("modifying a group", () => {
   });
 
   test("fails with status code 400 if id is invalid", async () => {
+    const token = await helper.getUserToken();
     const groupsAtStart = await helper.groupsInDb();
     const groupToModify = groupsAtStart[0];
     const invalidId = "nonValidId";
@@ -204,6 +231,7 @@ describe("modifying a group", () => {
 
     await api
       .put(`/api/groups/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(groupToModify)
       .expect(400);
 
