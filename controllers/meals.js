@@ -2,17 +2,24 @@ const mealsRouter = require("express").Router();
 const Meal = require("../models/meal");
 const Group = require("../models/group");
 const User = require("../models/users");
+const ObjectId = require("mongoose").Types.ObjectId;
+
 
 mealsRouter.get("/", async (req, res) => {
   if (!req.decodedToken) {
     return res.status(401).json({ error: "invalid token" });
   }
 
-  const meals = await Meal.find({})
+  const meals = await Meal.find({ user: req.decodedToken.id })
     .populate("group", { name: 1, weeklyRations: 1 })
     .populate("user", { username: 1, name: 1 });
 
-  res.json(meals);
+  if (meals.length !== 0) {
+    res.json(meals);
+  } else {
+    res.status(204).end();
+  }
+
 });
 
 mealsRouter.get("/:id", async (req, res) => {
@@ -20,11 +27,17 @@ mealsRouter.get("/:id", async (req, res) => {
     return res.status(401).json({ error: "invalid token" });
   }
 
+  if (!ObjectId.isValid(req.params.id)) {
+    res.status(400).end();
+  }
+
   const meal = await Meal.findById(req.params.id)
     .populate("group", { name: 1, weeklyRations: 1 })
     .populate("user", { username: 1, name: 1 });
 
-  if (meal) {
+  if (meal.user.id !== req.decodedToken.id) {
+    res.status(403).end();
+  } else if (meal) {
     res.json(meal);
   } else {
     res.status(404).end();
@@ -36,12 +49,18 @@ mealsRouter.delete("/:id", async (req, res) => {
     return res.status(401).json({ error: "invalid token" });
   }
 
-  const foundMeal = await Meal.findByIdAndRemove(req.params.id);
+  const foundMeal = await Meal.findById(req.params.id);
+
+  if (foundMeal && foundMeal.user.toString() !== req.decodedToken.id) {
+    res.status(403).end();
+    return;
+  }
 
   if (foundMeal) {
-    const user = await User.findById(foundMeal.user);
+    await Meal.deleteOne({ _id: req.params.id });
 
     // we also need to remove the meal from the user document
+    const user = await User.findById(foundMeal.user);
     user.meals = user.meals.filter(mealId => mealId.toString() !== foundMeal.id);
     await user.save();
 
@@ -114,6 +133,12 @@ mealsRouter.put("/:id", async (req, res) => {
   }
 
   const body = req.body;
+
+  const meal = await Meal.findById(req.params.id);
+  if (meal && meal.user.toString() !== req.decodedToken.id) {
+    res.status(403).end();
+    return;
+  }
 
   const group = await Group.findOne({ name: body.group });
   body.group = group.id;
