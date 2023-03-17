@@ -9,7 +9,7 @@ plansRouter.get("/", async (req, res) => {
     return res.status(401).json({ error: "invalid token" });
   }
 
-  const plans = await Plan.find({})
+  const plans = await Plan.find({ user: req.decodedToken.id })
     .populate({
       path: "lunch",
       select: { name: 1, group: 1, timeOfDay: 1, numberOfDays: 1 },
@@ -25,7 +25,11 @@ plansRouter.get("/", async (req, res) => {
       select: { username: 1, name: 1 }
     });
 
-  res.json(plans);
+  if (plans.length !== 0) {
+    res.json(plans);
+  } else {
+    res.status(204).end();
+  }
 });
 
 plansRouter.get("/:id", async (req, res) => {
@@ -53,7 +57,9 @@ plansRouter.get("/:id", async (req, res) => {
       select: { username: 1, name: 1 }
     });
 
-  if (plan) {
+  if (plan.user.id !== req.decodedToken.id) {
+    res.status(403).end();
+  } else if (plan) {
     res.json(plan);
   } else {
     res.status(404).end();
@@ -65,12 +71,18 @@ plansRouter.delete("/:id", async (req, res) => {
     return res.status(401).json({ error: "invalid token" });
   }
 
-  const removedPlan = await Plan.findByIdAndRemove(req.params.id);
+  const removedPlan = await Plan.findById(req.params.id);
+
+  if (removedPlan && removedPlan.user.toString() !== req.decodedToken.id) {
+    res.status(403).end();
+    return;
+  }
 
   if (removedPlan) {
-    const user = await User.findById(removedPlan.user);
+    await Plan.deleteOne({ _id: req.params.id });
 
     // we also need to remove the plan from the user document
+    const user = await User.findById(removedPlan.user);
     user.plans = user.plans.filter(planId => planId.toString() !== removedPlan.id);
     await user.save();
 
@@ -133,6 +145,12 @@ plansRouter.post("/", async (req, res) => {
 plansRouter.put("/:id", async (req, res) => {
   if (!req.decodedToken) {
     return res.status(401).json({ error: "invalid token" });
+  }
+
+  const plan = await Plan.findById(req.params.id);
+  if (plan && plan.user.toString() !== req.decodedToken.id) {
+    res.status(403).end();
+    return;
   }
 
   const body = req.body;
